@@ -1,0 +1,6 @@
+type,id,name,docking_score,prediction,paired_to
+candidate,mol_0747,mol_0747,-9.0,7.5,CANERTINIB
+candidate,mol_0487,mol_0487,-9.2,7.1,PYROTINIB
+candidate,mol_0116,mol_0116,-9.8,7.0,ALLITINIB
+positive,mol_0003,PYROTINIB,-9.2,8.3,mol_0487
+positive,mol_0028,ALLITINIB,-9.0,7.3,mol_0116

@@ -1,0 +1,17 @@
+positive_id,positive_name,chembl_id,docking_score,representative_ic50_nM,support_count,selection_pool,year,journal,bao_label
+mol_0041,PKI-166,CHEMBL1963502,-9.3,,,,,,
+mol_0013,OLMUTINIB,CHEMBL3786343,-9.7,39.0,1,WT/unspecified + protein/assay format exact IC50,2020,Eur J Med Chem,assay format
+mol_0012,TAK-285,CHEMBL1614725,-9.2,1.0,1,WT/unspecified + protein/assay format exact IC50,2015,Bioorg Med Chem Lett,single protein format
+mol_0045,PD-0166285,CHEMBL49120,-8.8,350.0,1,WT/unspecified + protein/assay format exact IC50,1998,J Med Chem,single protein format
+mol_0039,NAQUOTINIB,CHEMBL3663929,-9.7,230.0,1,WT/unspecified exact IC50,2016,Bioorg Med Chem Lett,cell-based format
+mol_0010,AZD-4769,CHEMBL422872,-8.2,,,,,,
+mol_0028,ALLITINIB,CHEMBL1947204,-9.0,,,,,,
+mol_0006,GEFITINIB,CHEMBL939,-8.2,33.0,9,WT/unspecified + protein/assay format exact IC50,2017,Bioorg Med Chem Lett,single protein format
+mol_0003,PYROTINIB,CHEMBL3647420,-9.2,0.48,1,WT/unspecified + protein/assay format exact IC50,2022,J Med Chem,single protein format
+mol_0043,TESEVATINIB,CHEMBL3544983,-9.0,0.3,1,WT/unspecified exact IC50,2019,J Med Chem,cell-based format
+mol_0031,ICOTINIB,CHEMBL2087361,-9.2,2.0,1,WT/unspecified + protein/assay format exact IC50,2012,Bioorg Med Chem Lett,single protein format
+mol_0037,MOBOCERTINIB,CHEMBL4650319,-8.9,0.025,1,WT/unspecified + protein/assay format exact IC50,2023,ACS Med Chem Lett,single protein format
+mol_0002,NERATINIB,CHEMBL180022,-8.3,92.0,5,WT/unspecified + protein/assay format exact IC50,2005,J Med Chem,assay format
+mol_0000,DACOMITINIB ANHYDROUS,CHEMBL2110732,-9.3,6.0,4,WT/unspecified + protein/assay format exact IC50,2021,Bioorg Med Chem Lett,single protein format
+mol_0007,CANERTINIB,CHEMBL31965,-8.3,0.8,4,WT/unspecified + protein/assay format exact IC50,2015,Eur J Med Chem,single protein format
+mol_0040,ERLOTINIB,CHEMBL553,-7.2,2.0,10,WT/unspecified + protein/assay format exact IC50,2017,Bioorg Med Chem Lett,single protein format

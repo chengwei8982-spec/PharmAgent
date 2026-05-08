@@ -1,0 +1,4 @@
+candidate_id,paired_positive_name,pair_rank,docking_score,prediction_pIC50,predicted_ic50_nM
+mol_0747,CANERTINIB,1,-8.9,7.4792037,33.17388234120821
+mol_0487,PYROTINIB,2,-9.1,7.146527,71.362983752083
+mol_0116,ALLITINIB,2,-9.5,7.0022144,99.49141326119938

@@ -1,0 +1,4 @@
+candidate_id,paired_positive_name,paired_approved_id,docking_score,prediction_pIC50,predicted_ic50_nM
+mol_0314,MOMELOTINIB,mol_0008,-8.8,7.7,19.952623149688787
+mol_0598,GOLIDOCITINIB,mol_0000,-8.5,7.7,19.952623149688787
+mol_0013,MOMELOTINIB,mol_0008,-10.2,7.6,25.11886431509582

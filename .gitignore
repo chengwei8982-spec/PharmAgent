@@ -16,10 +16,13 @@ checkpoints/
 save/
 workspace/
 
-# Large datasets and pretrained assets
-datasets/*
-!datasets/text/
-!datasets/text/phar_question_howmany_gpt4o_27.json
+# Datasets: keep source data, skip generated caches and derived binaries
+datasets/**/_server_cache/
+datasets/**/*__backup_*/
+datasets/**/*.pkl
+datasets/**/*.npz
+datasets/**/*.npy
+datasets/**/*.mdb
 pretrained/
 /text/
 server/

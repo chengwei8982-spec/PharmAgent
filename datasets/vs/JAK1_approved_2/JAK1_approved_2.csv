@@ -1,0 +1,13 @@
+smiles,Max Phase
+COc1nn(C)cc1Nc1nccc(-c2c[nH]c3c(NC(=O)[C@@H](C)N4CCN(C)CC4)cccc23)n1,2
+Cn1cc(Nc2nccc(N3C[C@H]4CC[C@@H](C3)N4C(=O)[C@@H]3CC3(F)F)n2)cn1,3
+N#CCC1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(C2CCN(C(=O)c3ccnc(C(F)(F)F)c3F)CC2)C1,3
+CCS(=O)(=O)N1CCN(c2ccc(Nc3ncc(C(N)=O)c(NC4CC4)n3)cc2)CC1,2
+N#CC[C@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1,4
+CCS(=O)(=O)N1CC(CC#N)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1,4
+CC1(C)CN(C(=O)c2ccc(-c3cccc4nc(NC(=O)C5CC5)nn34)cc2)C1,2
+O=C(Nc1nc2cccc(-c3ccc(CN4CCS(=O)(=O)CC4)cc3)n2n1)C1CC1,4
+N#CCNC(=O)c1ccc(-c2ccnc(Nc3ccc(N4CCOCC4)cc3)n2)cc1,4
+CCCS(=O)(=O)N[C@H]1C[C@@H](N(C)c2ncnc3[nH]ccc23)C1,4
+CCN(CC)C(=O)CNC(=O)c1cc(OC)c(OC)c(OC)c1,1
+CC[C@@H]1CN(C(=O)NCC(F)(F)F)C[C@@H]1c1cnc2cnc3[nH]ccc3n12,4

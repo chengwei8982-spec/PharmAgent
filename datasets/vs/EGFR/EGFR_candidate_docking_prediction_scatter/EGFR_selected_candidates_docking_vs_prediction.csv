@@ -1,0 +1,8 @@
+mol_id,prediction,docking_score,smiles
+mol_0710,6.986669,-9.5,COc1ccccc1NC(=O)Cn1nc2c(-c3nc(-c4cccc(Cl)c4)no3)cccn2c1=O
+mol_0882,7.0016813,-8.8,CCCCOc1ccc(-c2cc3c4nn(CC(=O)Nc5ccccc5OC)c(=O)n4ccn3n2)cc1
+mol_0116,7.0022144,-9.5,Cc1ccc(OCC(=O)Nc2cc(-c3nn(C)c(=O)c4ccccc34)ccc2N2CCOCC2)cc1
+mol_0487,7.146527,-9.1,COc1ccc(-c2ccc(=O)n(CC(=O)NC3CCN(Cc4ccccc4)CC3)n2)c(F)c1
+mol_0394,6.9749837,-8.3,COc1ccc(-c2nc3ccccc3c(=O)n2CCOc2ccccc2Cl)cc1
+mol_0017,7.156513,-7.7,COc1cc2ncn(CCC(=O)NC3CCN(Cc4ccccc4)CC3)c(=O)c2cc1OC
+mol_0747,7.4792037,-8.9,COc1cccc(NC(=O)Cn2nc(-c3cccc4ccccc34)ccc2=O)c1

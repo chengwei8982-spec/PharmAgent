@@ -1,0 +1,11 @@
+candidate_id,approved_id,shared_typed_interactions_n,shared_typed_interactions,unit_description,output_image
+mol_0013,mol_0004,0,,common key scaffold,mol_0013__vs_mol_0004__semantic_common_units.png
+mol_0203,mol_0004,0,,common key scaffold,mol_0203__vs_mol_0004__semantic_common_units.png
+mol_0237,mol_0001,0,,common key scaffold,mol_0237__vs_mol_0001__semantic_common_units.png
+mol_0300,mol_0004,0,,heteroaromatic core,mol_0300__vs_mol_0004__semantic_common_units.png
+mol_0314,mol_0004,0,,common key scaffold,mol_0314__vs_mol_0004__semantic_common_units.png
+mol_0539,mol_0004,0,,heteroaromatic core,mol_0539__vs_mol_0004__semantic_common_units.png
+mol_0598,mol_0008,0,,carbonyl/amide linker,mol_0598__vs_mol_0008__semantic_common_units.png
+mol_0726,mol_0002,0,,carbonyl/amide linker,mol_0726__vs_mol_0002__semantic_common_units.png
+mol_0754,mol_0001,0,,common key scaffold,mol_0754__vs_mol_0001__semantic_common_units.png
+mol_0991,mol_0005,0,,common key scaffold,mol_0991__vs_mol_0005__semantic_common_units.png

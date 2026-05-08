@@ -1,0 +1,6 @@
+type,id,name,docking_score,prediction
+candidate,mol_0314,mol_0314,-8.8,7.7
+candidate,mol_0598,mol_0598,-8.5,7.7
+candidate,mol_0013,mol_0013,-10.2,7.6
+positive,mol_0008,MOMELOTINIB,-9.4,7.9
+positive,mol_0000,GOLIDOCITINIB,-9.6,7.1
