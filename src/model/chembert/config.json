@@ -1,0 +1,10 @@
+{
+    "vocab_size": 48,
+    "max_len": 256,
+    "feature_dim": 1024,
+    "nhead": 16,
+    "feedforward_dim": 1024,
+    "nlayers": 8,
+    "adj": true,
+    "dropout_rate": 0.1
+}

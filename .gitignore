@@ -1,0 +1,39 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments and editor files
+.venv/
+venv/
+.env
+.DS_Store
+.vscode/
+
+# Generated outputs and local workdirs
+buffer/
+checkpoints/
+save/
+workspace/
+
+# Large datasets and pretrained assets
+datasets/*
+!datasets/text/
+!datasets/text/phar_question_howmany_gpt4o_27.json
+pretrained/
+/text/
+server/
+
+# Binary artifacts and archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.part_*
+*.pt
+*.ckpt
+*.bin
+*.safetensors
+
+# Logs
+*.log

@@ -1,0 +1,180 @@
+{
+  "Donor": [
+    {
+      "question": "How many nitrogen atoms (with various bonding states) and oxygen or sulfur atoms (with a single hydrogen atom) are present in the molecule?",
+      "SMARTS": "[$([N&!H0&v3,N&!H0&+1&v4,n&H1&+0,$([$([Nv3](-C)(-C)-C)]),$([$(n[n;H1]),$(nc[n;H1])])]),$([O,S;H1;+0])]",
+      "description": "This SMARTS pattern matches various nitrogen atoms (with no hydrogen or positive charge, with single hydrogen and positive charge, or nitrogen atoms connected to other nitrogen or carbon atoms), and oxygen or sulfur atoms with a single hydrogen atom and zero charge.",
+      "type": "SingleAtomDonor"
+    }
+  ],
+  "Acceptor": [
+    {
+      "question": "How many specific functional groups (such as hydroxyl, positively charged nitrogen, or fluorine connected to a non-halogenated carbon) are present in the molecule?",
+      "SMARTS": "[$([O;H1;v2]),$([O;H0;v2;!$(O=N-*),$([O;-;!$(*-N=O)]),$([o;+0])]),$([n;+0;!X3;!$([n;H1](cc)cc),$([$([N;H0]#[C&v4])]),$([N&v3;H0;$(Nc)])]),$([F;$(F-[#6]);!$(FC[F,Cl,Br,I])])]",
+      "description": "This SMARTS pattern matches hydroxyl groups (O-H), oxygen atoms without hydrogen but with positive charge, nitrogen atoms with positive charge excluding aromatic ones, and fluorine atoms connected to non-halogenated carbons.",
+      "type": "SingleAtomAcceptor"
+    }
+  ],
+  "NegIonizable": [
+    {
+      "question": "How many acidic groups are present in the molecule?",
+      "description": "Acidic groups are characterized by a carbon (C) or sulfur (S) atom double-bonded to an oxygen (O), sulfur (S), or phosphorus (P) atom, and single-bonded to an oxygen atom with either a hydrogen (H1) or negative charge (-1).",
+      "SMARTS": "[C,S](=[O,S,P])-[O;H1,H0&-1]",
+      "type": "AcidicGroup"
+    }
+  ],
+  "PosIonizable": [
+    {
+      "question": "How many positively charged nitrogen atoms (NH2+, NH1+, NH0+) bonded to non-double-bonded carbons are present in the molecule?",
+      "SMARTS": "[$([$([N;H2&+0][$([C;!$(C=*)])])]),$([$([N;H1&+0]([$([C;!$(C=*)])])[$([C;!$(C=*)])])]),$([$([N;H0&+0]([$([C;!$(C=*)])])([$([C;!$(C=*)])])[$([C;!$(C=*)])])]);!$(N[a])]",
+      "description": "This SMARTS pattern matches nitrogen atoms with positive charges (NH2+, NH1+, NH0+) bonded to non-double-bonded carbons. The pattern excludes aromatic nitrogens.",
+      "type": "BasicGroup"
+    },
+    {
+      "question": "How many PosN groups are present, where nitrogen has a positive charge and is not part of a nitro group (i.e., not bonded to an oxygen with a negative charge)?",
+      "SMARTS": "[#7;+;!$([N+]-[O-])]",
+      "description": "PosN: Nitrogen with a positive charge, excluding nitro groups (i.e., not bonded to oxygen with a negative charge).",
+      "type": "PosN"
+    },
+    {
+      "question": "How many Imidazole groups are present, where nitrogen is part of a six-membered ring with alternating double bonds, with a +1 charge on the nitrogen?",
+      "SMARTS": "c1ncnc1",
+      "description": "Imidazole: A five-membered heterocyclic ring with two nitrogen atoms and alternating double bonds, one of the nitrogen atoms having a +1 charge.",
+      "type": "Imidazole"
+    },
+    {
+      "question": "How many Guanidine groups are present, where nitrogen is part of a structure NC(=N)N, with two nitrogen atoms in the group?",
+      "SMARTS": "NC(=N)N",
+      "description": "Guanidine: A group with two nitrogen atoms, where one nitrogen is double-bonded to carbon and the other is single-bonded to carbon.",
+      "type": "Guanidine"
+    }
+  ],
+  "ZnBinder": [
+    {
+      "question": "How many ZnBinder1 groups are present in the molecule?",
+      "SMARTS": "[S;D1]-[#6]",
+      "description": "ZnBinder1: A sulfur atom bonded to a carbon atom.",
+      "type": "ZnBinder1"
+    },
+    {
+      "question": "How many ZnBinder2 groups are present in the molecule?",
+      "SMARTS": "[#6]-C(=O)-C-[S;D1]",
+      "description": "ZnBinder2: A carbon atom bonded to a carbonyl group and a sulfur atom.",
+      "type": "ZnBinder2"
+    },
+    {
+      "question": "How many ZnBinder3 groups are present in the molecule?",
+      "SMARTS": "[#6]-C(=O)-C-C-[S;D1]",
+      "description": "ZnBinder3: A carbonyl group attached to two carbon atoms and a sulfur atom.",
+      "type": "ZnBinder3"
+    },
+    {
+      "question": "How many ZnBinder4 groups are present in the molecule?",
+      "SMARTS": "[#6]-C(=O)-N-[O;D1]",
+      "description": "ZnBinder4: A carbonyl group bonded to a nitrogen atom and an oxygen atom.",
+      "type": "ZnBinder4"
+    },
+    {
+      "question": "How many ZnBinder5 groups are present in the molecule?",
+      "SMARTS": "[#6]-C(=O)-[O;D1]",
+      "description": "ZnBinder5: A carbonyl group bonded to an oxygen atom.",
+      "type": "ZnBinder5"
+    },
+    {
+      "question": "How many ZnBinder6 groups are present in the molecule?",
+      "SMARTS": "[#6]-P(=O)(-O)-[C,O,N]-[C,H]",
+      "description": "ZnBinder6: A carbon atom bonded to a phosphoric acid group, connected to a second carbon, oxygen, or nitrogen atom.",
+      "type": "ZnBinder6"
+    }
+  ],
+  "Aromatic": [
+    {
+      "question": "How many Arom4 features (4-membered aromatic rings) are present in the molecule?",
+      "SMARTS": "[$([a;r4,!R1&r3])]1:[$([a;r4,!R1&r3])]:[$([a;r4,!R1&r3])]:[$([a;r4,!R1&r3])]:1",
+      "description": "The Arom4 feature represents a 4-membered aromatic ring, where each atom in the ring is aromatic. This SMARTS pattern matches molecules containing 4-membered aromatic rings.",
+      "type": "Arom4"
+    },
+    {
+      "question": "How many aromatic systems consisting of four 5-membered aromatic rings connected by single bonds are present in the molecule?",
+      "SMARTS": "[$([a;r5,!R1&r4,!R1&r3])]1:[$([a;r5,!R1&r4,!R1&r3])]:[$([a;r5,!R1&r4,!R1&r3])]:[$([a;r5,!R1&r4,!R1&r3])]:[$([a;r5,!R1&r4,!R1&r3])]:1",
+      "description": "Aromatic system consisting of four 5-membered aromatic rings (AromR5), each connected by single bonds to form a cyclic structure. Each ring must be aromatic, with no fusion with 3-membered rings (R3) or 4-membered rings (R4).",
+      "type": "Arom5"
+    },
+    {
+      "question": "How many aromatic systems consisting of five 6-membered aromatic rings connected by single bonds are present in the molecule?",
+      "SMARTS": "[$([a;r6,!R1&r5,!R1&r4,!R1&r3])]1:[$([a;r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r6,!R1&r5,!R1&r4,!R1&r3])]:1",
+      "description": "Aromatic system consisting of five 6-membered aromatic rings (AromR6), connected by single bonds in a cyclic structure. Each ring is aromatic, and no ring is fused with 3-membered (R3), 4-membered (R4), or 5-membered (R5) rings.",
+      "type": "Arom6"
+    },
+    {
+      "question": "How many aromatic systems consisting of six 7-membered aromatic rings connected by single bonds are present in the molecule?",
+      "SMARTS": "[$([a;r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]1:[$([a;r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:1",
+      "description": "Aromatic system consisting of six 7-membered aromatic rings (AromR7) connected by single bonds. The rings must be aromatic and cannot be fused with 3-membered, 4-membered, 5-membered, or 6-membered rings.",
+      "type": "Arom7"
+    },
+    {
+      "question": "How many aromatic systems consisting of seven 8-membered aromatic rings connected by single bonds are present in the molecule?",
+      "SMARTS": "[$([a;r8,!R1&r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]1:[$([a;r8,!R1&r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r8,!R1&r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r8,!R1&r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r8,!R1&r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r8,!R1&r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r8,!R1&r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:[$([a;r8,!R1&r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3])]:1",
+      "description": "Aromatic system consisting of seven 8-membered aromatic rings (AromR8) connected by single bonds. Each ring must be aromatic, with no fusion to smaller aromatic rings (R3, R4, R5, R6, R7).",
+      "type": "Arom8"
+    }
+  ],
+  "Hydrophobe": [
+    {
+      "question": "How many ThreeWayAttach hydrophobic features are present in the molecule?",
+      "SMARTS": "[D3,D4;$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])]",
+      "description": "ThreeWayAttach: This feature identifies any molecule containing non-polar carbon atoms attached to a 3-bond (D3) or 4-bond (D4) structure. It is used to detect hydrophobic features in molecules.",
+      "type": "ThreeWayAttach"
+    },
+    {
+      "question": "How many ChainTwoWayAttach hydrophobic features are present in the molecule?",
+      "SMARTS": "[R0;D2;$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])]",
+      "description": "ChainTwoWayAttach: This feature identifies chain structures with non-polar carbon atoms attached to a 2-bond (D2) or a ring structure (R0). This feature is used to identify hydrophobic structures in molecules.",
+      "type": "ChainTwoWayAttach"
+    }
+  ],
+  "LumpedHydrophobe": [
+    {
+      "question": "How many nitro groups (NO2) are present in the molecule?",
+      "SMARTS": "[N;D3;+](=O)[O-]",
+      "description": "Nitro groups are characterized by a nitrogen atom bonded to two oxygens, where the nitrogen is positively charged and one oxygen is negatively charged.",
+      "type": "Nitro2"
+    },
+    {
+      "question": "How many RH6_6 groups are present in the molecule?",
+      "SMARTS": "[$([r6,!R1&r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])]1[$([r6,!R1&r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r6,!R1&r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r6,!R1&r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r6,!R1&r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r6,!R1&r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])]1",
+      "description": "The RH6_6 feature represents a structure where six-membered rings are connected in a specific way, each ring containing hydrophobic atoms like carbon, halogens, or other non-polar atoms. The SMARTS pattern matches molecules containing multiple six-membered rings with hydrophobic atoms.",
+      "type": "RH6_6"
+    },
+    {
+      "question": "How many RH5_5 groups are present in the molecule?",
+      "SMARTS": "[$([r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])]1[$([r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r5,!R1&r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])]1",
+      "description": "The RH5_5 feature represents a structure where five-membered rings are connected in a specific way, each ring containing hydrophobic atoms like carbon, halogens, or other non-polar atoms. The SMARTS pattern matches molecules containing multiple five-membered rings with hydrophobic atoms.",
+      "type": "RH5_5"
+    },
+    {
+      "question": "How many RH4_4 groups are present in the molecule?",
+      "SMARTS": "[$([r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])]1[$([r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r4,!R1&r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])]1",
+      "description": "The RH4_4 feature represents a structure where four-membered rings are connected in a specific way, each ring containing hydrophobic atoms like carbon, halogens, or other non-polar atoms. The SMARTS pattern matches molecules containing multiple four-membered rings with hydrophobic atoms.",
+      "type": "RH4_4"
+    },
+    {
+      "question": "How many RH3_3 groups are present in the molecule?",
+      "SMARTS": "[$([r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])]1[$([r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])][$([r3]);$([R;$([c,s,S&H0&v2,Br,I,$([#6;+0;!$([#6;$([#6]~[#7,#8,#9])])])])])]1'",
+      "description": "The RH3_3 feature represents a structure where three-membered rings are connected in a specific way, each ring containing hydrophobic atoms like carbon, halogens, or other non-polar atoms. The SMARTS pattern matches molecules containing multiple three-membered rings with hydrophobic atoms.",
+      "type": "RH3_3"
+    },
+    {
+      "question": "How many tButyl groups are present in the molecule?",
+      "SMARTS": "[C;!R](-[CH3])(-[CH3])-[CH3]",
+      "description": "The tButyl feature represents a structure where a carbon atom is connected to three methyl groups (CH3), forming a t-Butyl group. The SMARTS pattern matches molecules containing t-Butyl groups.",
+      "type": "tButyl"
+    },
+    {
+      "question": "How many iPropyl groups are present in the molecule?",
+      "SMARTS": "[CH;!R](-[CH3])-[CH3]",
+      "description": "The iPropyl feature represents a structure where a carbon atom is connected to two methyl groups (CH3), forming an i-Propyl group. The SMARTS pattern matches molecules containing i-Propyl groups.",
+      "type": "iPropyl"
+    }
+  ]
+}
