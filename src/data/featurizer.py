@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 import numpy as np
 import torch
@@ -41,7 +42,26 @@ atom_featurizer_all = ConcatFeaturizer([  # 137
     atom_mass,  # 1
 ])
 
-fdefName = os.path.join(RDConfig.RDDataDir, 'BaseFeatures.fdef')
+def _resolve_base_features_path():
+    candidates = []
+
+    rddata_dir = getattr(RDConfig, 'RDDataDir', None)
+    if rddata_dir:
+        candidates.append(os.path.join(rddata_dir, 'BaseFeatures.fdef'))
+
+    candidates.extend([
+        os.path.join(sys.prefix, 'share', 'RDKit', 'Data', 'BaseFeatures.fdef'),
+        os.path.join(sys.prefix, 'lib', 'python%s.%s' % sys.version_info[:2], 'site-packages', 'rdkit', 'Data', 'BaseFeatures.fdef'),
+    ])
+
+    for candidate in candidates:
+        if candidate and os.path.exists(candidate):
+            return candidate
+
+    raise OSError('BaseFeatures.fdef could not be found. Checked: %s' % ', '.join(candidates))
+
+
+fdefName = _resolve_base_features_path()
 factory = ChemicalFeatures.BuildFeatureFactory(fdefName)
 factory_names = factory.GetFeatureDefs()
 phar_Dict = {'Donor': 0, 'Acceptor': 1, 'NegIonizable': 2, 'PosIonizable': 3, 'Aromatic': 4, 'Hydrophobe': 5,
