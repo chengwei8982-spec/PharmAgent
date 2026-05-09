@@ -1,4 +1,4 @@
-name: pharmaprompt
+name: PharmAgent
 channels:
   - conda-forge
 dependencies:

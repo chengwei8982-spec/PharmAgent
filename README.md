@@ -57,10 +57,10 @@ The `DEN1` checkpoint is only required if you want to support code paths that in
 
 ## Environment
 
-The recommended runtime is the locally validated `KPGT` conda environment.
+The recommended runtime is the `PharmAgent` conda environment.
 
 ```bash
-conda activate KPGT
+conda activate PharmAgent
 ```
 
 If you are reproducing the environment from scratch, the repository provides two dependency entry points:
@@ -72,7 +72,7 @@ Recommended installation order:
 
 ```bash
 conda env create -f environment.yml
-conda activate pharmaprompt
+conda activate PharmAgent
 pip install -r requirements.txt
 ```
 
