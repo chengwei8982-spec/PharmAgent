@@ -1,6 +1,6 @@
 # PharmaPrompt
 
-PharmaPrompt is a repository for molecular property training, inference, and attribution analysis.
+PharmaPrompt is a repository for molecular property training and attribution analysis.
 
 This public release keeps code and source datasets in GitHub, while model weights are distributed separately through Google Drive.
 
@@ -16,11 +16,10 @@ The current public Google Drive release is documented in [MODEL_RELEASE_MINIMAL.
 
 Prepare a Google Drive folder that contains the files listed in [MODEL_RELEASE_MINIMAL.md](MODEL_RELEASE_MINIMAL.md).
 
-The current public Google Drive release is organized as three archives:
+The current public Google Drive release is organized around shared weights plus optional task-specific checkpoints:
 
 - `pharmaprompt_shared_models.zip`
 - `pharmaprompt_chembert_den1.zip`
-- `pharmaprompt_public_task_checkpoints_core4.zip`
 
 After downloading, the repository should contain at least these paths:
 
@@ -30,20 +29,10 @@ pretrained/BiomedBERT/config.json
 pretrained/BiomedBERT/vocab.txt
 pretrained/BiomedBERT/pytorch_model.bin
 checkpoints/DEN1/pytorch_model.bin
-save/EGFR/.../best_model.pth
-save/HPK1_IC50/.../best_model.pth
-save/FGFR1_IC50/.../best_model.pth
-save/JAK1/.../best_model.pth
+save/<YOUR_TASK>/.../best_model.pth
 ```
 
 If you package the files as zip archives for Google Drive, unzip them at the repository root so the relative paths remain unchanged.
-
-The four-task public checkpoint archive currently includes:
-
-- `EGFR`
-- `HPK1_IC50`
-- `FGFR1_IC50`
-- `JAK1`
 
 Quick local check:
 
@@ -172,17 +161,15 @@ This workflow generates derived training artifacts such as:
 - `phar_features_lmdb/`
 - `smiles_embeddings_chembert_lmdb/`
 
-## Testing And Inference
+## Attribution
 
 Inspect the available script arguments first:
 
 ```bash
-python scripts/predict_approved.py --help
-python scripts/predict_drugbank_top20.py --help
 python scripts/attribution_deepshap_single.py --help
 ```
 
-For almost all inference workflows you need:
+For attribution you typically need:
 
 - `pretrained/base/base.pth`
 - `pretrained/BiomedBERT/*`
@@ -203,39 +190,6 @@ python scripts/finetune_pharmaPrompt.py \
   --num_runs 1 \
   --num_workers 0 \
   --batch_size 4
-```
-
-### Approved Drug Prediction
-
-This example expects the EGFR finetuned checkpoint from Google Drive:
-
-```bash
-python scripts/predict_approved.py \
-  --model_name EGFR \
-  --approved_name EGFR_approved_2 \
-  --device cuda:0 \
-  --batch_size 16 \
-  --num_workers 0
-```
-
-Required checkpoint path:
-
-```text
-save/EGFR/question_num8/scaffold-0/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth
-```
-
-### DrugBank Top-20 Screening
-
-This example expects the HPK1_IC50 finetuned checkpoint from Google Drive:
-
-```bash
-python scripts/predict_drugbank_top20.py \
-  --checkpoint_dir save/HPK1_IC50/question_num8/scaffold-3/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1 \
-  --source_drugbank_csv /abs/path/to/drugbank.csv \
-  --source_smiles_col SMILES \
-  --train_dataset_name HPK1_IC50 \
-  --train_split_name scaffold-3 \
-  --device cuda:0
 ```
 
 ### Single-Molecule DeepSHAP Attribution
@@ -264,23 +218,19 @@ For the current public release, keep Google Drive organized in three layers:
 
 - Shared base models: `pretrained/base/` and `pretrained/BiomedBERT/`
 - ChemBERT support: `checkpoints/DEN1/pytorch_model.bin`
-- Task checkpoints: upload only the task directories you want to support publicly
+- Task checkpoints: upload only the task directories you need for evaluation or attribution
 
 The current release uses these archive names:
 
 - `pharmaprompt_shared_models.zip`
 - `pharmaprompt_chembert_den1.zip`
-- `pharmaprompt_public_task_checkpoints_core4.zip`
 
-The current practical release that covers the documented public tasks is:
+The current practical release that covers the documented public workflows is:
 
 - shared base weights
 - `DEN1` if you want chembert path support
-- `EGFR` checkpoint for `predict_approved.py`
-- `HPK1_IC50` checkpoint for `predict_drugbank_top20.py`
-- `FGFR1_IC50` checkpoint for additional public inference coverage
-- `JAK1` checkpoint for additional public inference coverage
+- one compatible finetuned checkpoint for the task you want to evaluate or attribute
 
-If you want broader public inference coverage later, add more `save/<TASK>/.../best_model.pth` files following the same relative layout.
+If you want broader public task coverage later, add more `save/<TASK>/.../best_model.pth` files following the same relative layout.
 
-Additional checkpoints such as `bbbp`, `clintox`, `sider`, `tox21`, `toxcast`, and individual `CHEMBL*` tasks can be published later as separate follow-up releases.
+Additional checkpoints can be published later as separate follow-up releases.
