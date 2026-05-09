@@ -14,6 +14,7 @@ venv/
 buffer/
 checkpoints/
 save/
+scripts_release/
 workspace/
 
 # Datasets: keep source data, skip generated caches and derived binaries
