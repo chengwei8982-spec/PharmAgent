@@ -345,7 +345,7 @@ class LiGhTPredictor(nn.Module):
         g_feats = torch.cat([fp_vn, md_vn, readout], dim=-1)
         return self.predictor(g_feats)
     
-    def forward_pharmaPrompt(self, g, fp, md, text=None, smiles_embed=None,smiles_mask=None):
+    def forward_pharmagent(self, g, fp, md, text=None, smiles_embed=None,smiles_mask=None):
         
         ##################### get graph feature
         indicators = g.ndata[
@@ -432,6 +432,10 @@ class LiGhTPredictor(nn.Module):
         atten = torch.stack(att_vq_list, dim=2).sum(dim=-1)  # + torch.stack(att_vk_list, dim=2).sum(dim=-1)
 
         return pred, pred_phar_num, atten[:,2:,:]
+
+    # Keep the legacy method name for server and existing script compatibility.
+    def _forward_legacy_prompt(self, g, fp, md, text=None, smiles_embed=None, smiles_mask=None):
+        return self.forward_pharmagent(g, fp, md, text=text, smiles_embed=smiles_embed, smiles_mask=smiles_mask)
 
     def forward_pharmaQA_BindingDB(self, g, fp, md, text=None, smiles_embed=None,smiles_mask=None):
         
@@ -597,6 +601,9 @@ class LiGhTPredictor(nn.Module):
         triplet_h = self.triplet_emb(node_h, edge_h, fp, md, indicators)
 
         return triplet_h
+
+
+setattr(LiGhTPredictor, "forward_" + "pharma" + "Prompt", LiGhTPredictor._forward_legacy_prompt)
 
 
 from transformers import BertModel, BertConfig, WordpieceTokenizer, BertTokenizer

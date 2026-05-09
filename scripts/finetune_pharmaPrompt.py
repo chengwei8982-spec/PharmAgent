@@ -23,7 +23,7 @@ import numpy as np
 import random
 from src.data.featurizer import Vocab, N_ATOM_TYPES, N_BOND_TYPES
 from src.data.finetune_dataset import PharmaQADataset
-from src.data.collator import Collator_pharmaPrompt 
+from src.data.collator import Collator_pharmagent 
 from src.model.light import LiGhTPredictor as LiGhT,TextEncoder
 from src.trainer.scheduler import PolynomialDecayLR
 from src.trainer.finetune_trainer import Trainer_pharmaQA
@@ -145,7 +145,7 @@ def parse_args():
     parser.add_argument("--num_workers", type=int, default=0, 
                        help='Number of workers for data loading. Set to 0 to avoid multiprocessing issues.')
 
-    # pharmaPrompt
+    # PharmAgent
     parser.add_argument("--n_layers", type=int, default=2)
     parser.add_argument("--projection_layers", type=int, default=2)
     parser.add_argument("--num_questions", type=int, default=len(phar_num_list))
@@ -453,7 +453,7 @@ def finetune(args, seed):
     g.manual_seed(args.seed)
     save_path = create_save_path(args, seed)
     args.save_path = save_path
-    collator = Collator_pharmaPrompt(args.max_length)
+    collator = Collator_pharmagent(args.max_length)
 
     # get text question embeddings
     text_dict, text_model = get_question_embeddings(args)
@@ -539,7 +539,7 @@ def evaluation(args, seed=None):
     args.save_path = save_path
     # Keep evaluation and finetuning on the same collator to avoid
     # diverging batch formats between the two code paths.
-    collator = Collator_pharmaPrompt(args.max_length)
+    collator = Collator_pharmagent(args.max_length)
 
     # 获取文本问题嵌入
     text_dict, text_model = get_question_embeddings(args)

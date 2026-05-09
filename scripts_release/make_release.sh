@@ -41,7 +41,7 @@ done
 
 mkdir -p "${OUT_DIR}"
 if [[ -z "${OUT}" ]]; then
-  OUT="${OUT_DIR}/pharmaprompt-code-${DATE}.tar.gz"
+  OUT="${OUT_DIR}/pharmagent-code-${DATE}.tar.gz"
 fi
 
 EXCLUDES=(

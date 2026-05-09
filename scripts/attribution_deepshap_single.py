@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Single-SMILES pharmacophore attribution (DeepSHAP) for PharmaPrompt.
+Single-SMILES pharmacophore attribution (DeepSHAP) for PharmAgent.
 
 What it does:
 - Runs the trained model on (target_smiles + background_smiles).
@@ -126,9 +126,9 @@ def _find_repo_root() -> Path:
             if p in seen:
                 continue
             seen.add(p)
-            if (p / "scripts" / "attribution_deepshap_single.py").exists() and (p / "src").exists():
+            if (p / "server" / "inference_service.py").exists():
                 return p
-    raise RuntimeError("Cannot locate repo root (missing scripts/ and src/ markers).")
+    raise RuntimeError("Cannot locate repo root (missing server/inference_service.py).")
 
 
 def _ensure_rdkit_data_path() -> None:
@@ -705,7 +705,7 @@ def main():
     os.chdir(str(repo))
     _ensure_rdkit_data_path()
 
-    from src.inference_service import InferenceService
+    from server.inference_service import InferenceService
 
     ckpt = Path(args.ckpt_path).expanduser().resolve() if args.ckpt_path else _default_ckpt_path(repo, args.model)
     if not ckpt.exists():

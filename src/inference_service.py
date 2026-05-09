@@ -74,12 +74,12 @@ class InferenceService:
         if self._repo_imported:
             return
         sys.path.append(self.repo_root)
-        from src.data.collator import Collator_pharmaPrompt  # noqa
+        from src.data.collator import Collator_pharmagent  # noqa
         from src.data.finetune_dataset import PharmaQADataset  # noqa
         from src.model.light import TextEncoder  # noqa
         from src.model_config import config_dict  # noqa
 
-        self._Collator = Collator_pharmaPrompt
+        self._Collator = Collator_pharmagent
         self._Dataset = PharmaQADataset
         self._TextEncoder = TextEncoder
         self._config_dict = config_dict
@@ -357,7 +357,7 @@ class InferenceService:
                 smiles_embed = smiles_embed.to(device)
                 smiles_mask = smiles_mask.to(device)
 
-                pred, pred_phar_num, atten = model.forward_pharmaPrompt(
+                pred, pred_phar_num, atten = model.forward_pharmagent(
                     graphs, fps, mds, text=text_dict, smiles_embed=smiles_embed, smiles_mask=smiles_mask
                 )
 

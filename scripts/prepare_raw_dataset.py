@@ -24,7 +24,7 @@ FEATURE_FACTORY = ChemicalFeatures.BuildFeatureFactory(FDEF_NAME)
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Prepare a raw CSV dataset into PharmaPrompt trainable format."
+        description="Prepare a raw CSV dataset into PharmAgent trainable format."
     )
     parser.add_argument("--input_csv", type=str, required=True, help="Path to raw CSV file.")
     parser.add_argument("--dataset_name", type=str, required=True, help="Output dataset folder name.")

@@ -20,7 +20,7 @@ from dgl.data.utils import load_graphs
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
 
-from src.data.collator import Collator_pharmaPrompt
+from src.data.collator import Collator_pharmagent
 from src.data.featurizer import Vocab, N_ATOM_TYPES, N_BOND_TYPES
 from src.data.finetune_dataset import PharmaQADataset
 from src.model.ban import FCNet_ca, KBANLayer, MLP, compute_attention_mask
@@ -768,7 +768,7 @@ def predict(
             smiles_embed = smiles_embed.to(device)
             smiles_mask = smiles_mask.to(device)
 
-            pred, _, _ = model.forward_pharmaPrompt(
+            pred, _, _ = model.forward_pharmagent(
                 graphs, fps, mds, text=text_dict, smiles_embed=smiles_embed, smiles_mask=smiles_mask
             )
 
@@ -850,7 +850,7 @@ def main():
 
     # 3) 加载 dataset + collator
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
-    collator = Collator_pharmaPrompt(max_length=128)
+    collator = Collator_pharmagent(max_length=128)
     ds = PharmaQADataset(
         root_path=args.dataset_base_path,
         dataset=args.cache_dataset_name,

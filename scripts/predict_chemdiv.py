@@ -18,8 +18,8 @@ from src.model.ban import KBANLayer
 from src.model.ban import MLP
 from src.utils import set_random_seed
 from src.data.featurizer import Vocab, N_ATOM_TYPES, N_BOND_TYPES
-from src.data.finetune_dataset import PharmaQADataset, pharmaPromptDataset_chemdiv
-from src.data.collator import Collator_pharmaPrompt_chemdiv
+from src.data.finetune_dataset import PharmaQADataset, pharmagentDataset_chemdiv
+from src.data.collator import Collator_pharmagent_chemdiv
 import dgl
 from src.model.light import LiGhTPredictor as LiGhT, TextEncoder
 from src.model.prompt_fusion import TwoStagePromptFusion
@@ -292,7 +292,7 @@ def create_chemdiv_dataset(args):
         'index': None  # 使用所有数据
     }
 
-    dataset = pharmaPromptDataset_chemdiv(**dataset_params)
+    dataset = pharmagentDataset_chemdiv(**dataset_params)
     return dataset
 
 def set_mean_and_std(labels):
@@ -309,7 +309,7 @@ def test(model, device, loader, text_model, text_dict):
     with torch.no_grad():
         for batch_idx, data in enumerate(tqdm(loader, desc="Predicting")):
             try:
-                # Unpack the batched data from pharmaPromptDataset_chemdiv
+                # Unpack the batched data from pharmagentDataset_chemdiv
                 (smiles, graphs, fps, mds, phar_targets, phar_target_mx, atom_phar_target_map, labels) = data
                 
                 # Move tensors to the device
@@ -331,7 +331,7 @@ def test(model, device, loader, text_model, text_dict):
                 smiles_mask = smiles_mask.to(device)
                 
                 # Forward pass through model
-                predictions, pred_phar_num, atten = model.forward_pharmaPrompt(graphs, fps, mds, text=text_dict,
+                predictions, pred_phar_num, atten = model.forward_pharmagent(graphs, fps, mds, text=text_dict,
                      smiles_embed=smiles_embeddings, smiles_mask=smiles_mask)
 
                 total_preds = torch.cat((total_preds, predictions.cpu()), 0)
@@ -364,7 +364,7 @@ def predict_chemdiv(args):
     vocab = Vocab(N_ATOM_TYPES, N_BOND_TYPES)
     
     # 创建collator
-    collator = Collator_pharmaPrompt_chemdiv(args.max_length)
+    collator = Collator_pharmagent_chemdiv(args.max_length)
 
     # 获取文本问题嵌入
     text_dict, text_model = get_question_embeddings(args)

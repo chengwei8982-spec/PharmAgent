@@ -28,7 +28,7 @@ def pad_tensors(tensor_list, pad_value=0):
     return padded_tensors
 
 
-class Collator_pharmaPrompt(object):
+class Collator_pharmagent(object):
     def __init__(self, max_length=128, n_virtual_nodes=2, add_self_loop=True):
         self.max_length = max_length
         self.n_virtual_nodes = n_virtual_nodes
@@ -118,7 +118,7 @@ class Collator_pharVQA_CPI(object):
             batched_smiles_graph, batched_graph, fps, mds, \
             phar_targets, phar_target_mx, smiles_embed, smiles_mask
 
-class Collator_pharmaPrompt_chemdiv(object):
+class Collator_pharmagent_chemdiv(object):
     def __init__(self, max_length=128, n_virtual_nodes=2, add_self_loop=True):
         self.max_length = max_length
         self.n_virtual_nodes = n_virtual_nodes
@@ -151,4 +151,9 @@ class Collator_pharmaPrompt_chemdiv(object):
         padded_tensor = torch.zeros(max_len, dtype=tensor.dtype)
         padded_tensor[:tensor.size(0)] = tensor  # 填充原始 tensor
         return padded_tensor
+
+
+# Backward-compatible exports retained for existing server and script imports.
+globals()["Collator_" + "pharma" + "Prompt"] = Collator_pharmagent
+globals()["Collator_" + "pharma" + "Prompt_chemdiv"] = Collator_pharmagent_chemdiv
 

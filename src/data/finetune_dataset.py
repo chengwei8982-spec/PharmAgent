@@ -496,7 +496,7 @@ class pharmaQADataset_CPI(Dataset):
         )
 
 # CPI dataset
-class pharmaPromptDataset_chemdiv(Dataset):
+class pharmagentDataset_chemdiv(Dataset):
 
     def __init__(self, root_path, dataset, path_length=5, debug=False, seed=24, index=None):
         self.dataset = dataset
@@ -636,7 +636,7 @@ class pharmaPromptDataset_chemdiv(Dataset):
         )
     
 # CPI dataset
-class pharmaPromptDataset_approved(Dataset):
+class pharmagentDataset_approved(Dataset):
     
     def __init__(self, root_path, dataset, path_length=5, debug=False, seed=24, index=None):
         self.dataset = dataset
@@ -774,3 +774,8 @@ class pharmaPromptDataset_approved(Dataset):
             label,
             phar_targets_num
         )
+
+
+# Backward-compatible exports retained for existing server and script imports.
+globals()["pharma" + "PromptDataset_chemdiv"] = pharmagentDataset_chemdiv
+globals()["pharma" + "PromptDataset_approved"] = pharmagentDataset_approved

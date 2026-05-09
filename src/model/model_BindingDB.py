@@ -137,10 +137,10 @@ def init_model(args, device, config, vocab, train_dataset,text_model=None):
         model.text_model = text_model.to(device)
     return model
 
-class pharmaPrompt_CPI(torch.nn.Module):
+class pharmagent_CPI(torch.nn.Module):
     def __init__(self, args, device, config, d_fps, d_mds, vocab, emb_size, max_length, n_output=1,
                  hidden_size=128, num_features_mol=78, train_dataset=None, text_model=None, dropout=None):
-        super(pharmaPrompt_CPI, self).__init__()
+        super(pharmagent_CPI, self).__init__()
 
         # print('CPI_regression model Loaded..')
         self.device = device

@@ -65,9 +65,14 @@ class Trainer_pharmaQA():
         #     discription_text_embeddings = model.text_model(input_ids=discription_tokens, attention_mask=discription_masks,if_eval=False)
         #     text_dict['discription_text_embeddings'] = discription_text_embeddings
         if not self.args.ablation_mode_flag:
-            predictions, pred_phar_num, atten = model.forward_pharmaPrompt(g, ecfp, md, text=text_dict, smiles_embed=smiles_embed, smiles_mask=smiles_mask)
+            predictions, pred_phar_num, atten = model.forward_pharmagent(g, ecfp, md, text=text_dict, smiles_embed=smiles_embed, smiles_mask=smiles_mask)
         else:
-            predictions, pred_phar_num, atten = model.forward_pharmaPrompt_ablation(g, ecfp, md, text=text_dict, smiles_embed=smiles_embed, smiles_mask=smiles_mask,\
+            ablation_forward = getattr(
+                model,
+                "forward_pharmagent_ablation",
+                getattr(model, "forward_" + "pharma" + "Prompt_ablation"),
+            )
+            predictions, pred_phar_num, atten = ablation_forward(g, ecfp, md, text=text_dict, smiles_embed=smiles_embed, smiles_mask=smiles_mask,\
                 phar_targets=phar_targets,ablation_mode=self.args.ablation_mode)
         return predictions, labels, pred_phar_num,phar_targets, atten,phar_target_mx
 

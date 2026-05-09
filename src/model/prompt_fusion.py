@@ -143,7 +143,7 @@ class OneStagePromptFusion(nn.Module):
         molecules_prompt = x.mean(dim=1)  # [B,N, D] -> [B,D]
         return molecules_prompt  # [B,D] 
     
-class StaticPharmaPromptFusion(nn.Module):
+class StaticPharmAgentFusion(nn.Module):
     def __init__(self):
         super().__init__()
         

@@ -20,7 +20,7 @@ from tqdm import tqdm
 from src.model.ban import KBANLayer, KBANLayer_AAAI
 from src.model.prompt_fusion import OneStagePromptFusion, TwoStagePromptFusion
 from src.model.light import TextEncoder
-from finetune_pharmaPrompt import str2bool
+from finetune_pharmagent import str2bool
 from src.model.atten_module import MultiHeadedAttention
 from src.model.encoder import TransformerEncoder
 import seaborn as sns
@@ -35,7 +35,7 @@ import numpy as np
 import random
 from src.data.featurizer import Vocab, N_ATOM_TYPES, N_BOND_TYPES
 from src.data.finetune_dataset import phar_Dict, PharmaVQADataset
-from src.data.collator import Collator_pharVQA, Collator_pharmaPrompt
+from src.data.collator import Collator_pharVQA, Collator_pharmagent
 from src.model.rxn_model import MLP
 from src.model.light import LiGhTPredictor as LiGhT
 from src.model_config import config_dict
@@ -869,7 +869,7 @@ def eval_drugbank(args):
         os.makedirs(args.save_map_path)
 
     # Collator for batching
-    collator = Collator_pharmaPrompt(args.max_length)
+    collator = Collator_pharmagent(args.max_length)
 
     # get text question embeddings
     text_dict,_ = get_question_embeddings(args)
@@ -999,7 +999,7 @@ def eval_drugbank(args):
                 # molecules_prompt = torch.stack(molecules_phar_prompt, dim=1)
                 # molecules_prompt = model.prompt_projection_model(molecules_prompt.reshape(batch_size, -1))
                 # molecule_repr = torch.cat((molecules_prompt, molecule_repr), dim=-1)
-                predictions, pred_phar_num, atten = model.forward_pharmaPrompt(g, ecfp, md, text=text_dict, smiles_embed=smiles_embed, smiles_mask=smiles_mask)
+                predictions, pred_phar_num, atten = model.forward_pharmagent(g, ecfp, md, text=text_dict, smiles_embed=smiles_embed, smiles_mask=smiles_mask)
                 # if predictions.dim() == 2:
                 #     predictions = predictions.squeeze()
                 # elif predictions.dim() == 0:

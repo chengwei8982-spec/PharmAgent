@@ -24,7 +24,7 @@ from tqdm import tqdm
 import scipy.sparse as sps
 from src.utils import target_matrics, get_mse, smile_to_graph, get_pearson
 from src.model.light import TextEncoder
-from src.model.model_BindingDB import pharmaPrompt_CPI
+from src.model.model_BindingDB import pharmagent_CPI
 from src.data.collator import Collator_pharVQA_CPI
 from src.data.featurizer import Vocab, N_ATOM_TYPES, N_BOND_TYPES
 from src.data.finetune_dataset import pharmaQADataset_CPI
@@ -529,7 +529,7 @@ def main(args):
     
     # instantiate a model
     vocab = Vocab(N_ATOM_TYPES, N_BOND_TYPES)
-    model = pharmaPrompt_CPI(args, device, config_dict, 512, 200, vocab,
+    model = pharmagent_CPI(args, device, config_dict, 512, 200, vocab,
                             emb_size=emb_size, max_length=max_length, dropout=dropout_global,
                             train_dataset=train_data)
 
