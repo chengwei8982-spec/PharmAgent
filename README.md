@@ -16,10 +16,18 @@ The current public Google Drive release is documented in [MODEL_RELEASE_MINIMAL.
 
 Prepare a Google Drive folder that contains the files listed in [MODEL_RELEASE_MINIMAL.md](MODEL_RELEASE_MINIMAL.md).
 
+Google Drive folder:
+
+- https://drive.google.com/open?id=1a9IFLwqMOGm9OV4UfH7VW5z5HmOdM2Zk
+
 The current public Google Drive release is organized around shared weights plus optional task-specific checkpoints:
 
 - `pharmaprompt_shared_models.zip`
+  https://drive.google.com/open?id=1d2LcD0o20lgS29cMaDQkC_E8q0JT_aYA
 - `pharmaprompt_chembert_den1.zip`
+  https://drive.google.com/open?id=1CSalCaThqyiedeGg0HR-oJVCIC1OyU87
+- `pharmaprompt_example_task_checkpoints.zip`
+  https://drive.google.com/open?id=13xNV3TebAGDxsO4cNWYlmwXqXPpDmzb_
 
 After downloading, the repository should contain at least these paths:
 
@@ -224,6 +232,7 @@ The current release uses these archive names:
 
 - `pharmaprompt_shared_models.zip`
 - `pharmaprompt_chembert_den1.zip`
+- `pharmaprompt_example_task_checkpoints.zip`
 
 The current practical release that covers the documented public workflows is:
 
