@@ -4,23 +4,10 @@ PharmaPrompt is a repository for molecular property training and attribution ana
 
 This public release keeps code and source datasets in GitHub, while model weights are distributed separately through Google Drive.
 
-## Release Layout
-
-- GitHub includes: source code, scripts, server code, source datasets, and dependency files.
-- Google Drive includes: pretrained weights and finetuned task checkpoints.
-- To run inference, attribution, or the server, download the required model files from Google Drive and place them under the repository root with the original relative paths preserved.
-
-The current public Google Drive release is documented in [MODEL_RELEASE_MINIMAL.md](MODEL_RELEASE_MINIMAL.md), including the optional `DEN1` checkpoint for chembert-based paths.
 
 ## Model Download
 
-Prepare a Google Drive folder that contains the files listed in [MODEL_RELEASE_MINIMAL.md](MODEL_RELEASE_MINIMAL.md).
-
-Google Drive folder:
-
-- https://drive.google.com/open?id=1a9IFLwqMOGm9OV4UfH7VW5z5HmOdM2Zk
-
-The current public Google Drive release is organized around shared weights plus optional task-specific checkpoints:
+The model weights and task-specific checkpoints:
 
 - `pharmaprompt_shared_models.zip`
   https://drive.google.com/open?id=1d2LcD0o20lgS29cMaDQkC_E8q0JT_aYA
