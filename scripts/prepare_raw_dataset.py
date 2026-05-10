@@ -18,7 +18,37 @@ sys.path.append(REPO_ROOT)
 
 from src.model.light import TextEncoder
 
-FDEF_NAME = os.path.join(RDConfig.RDDataDir, "BaseFeatures.fdef")
+
+def _resolve_base_features_path():
+    candidates = []
+
+    rddata_dir = getattr(RDConfig, "RDDataDir", None)
+    if rddata_dir:
+        candidates.append(os.path.join(rddata_dir, "BaseFeatures.fdef"))
+
+    candidates.extend(
+        [
+            os.path.join(sys.prefix, "share", "RDKit", "Data", "BaseFeatures.fdef"),
+            os.path.join(
+                sys.prefix,
+                "lib",
+                "python%s.%s" % sys.version_info[:2],
+                "site-packages",
+                "rdkit",
+                "Data",
+                "BaseFeatures.fdef",
+            ),
+        ]
+    )
+
+    for candidate in candidates:
+        if candidate and os.path.exists(candidate):
+            return candidate
+
+    raise OSError("BaseFeatures.fdef could not be found. Checked: %s" % ", ".join(candidates))
+
+
+FDEF_NAME = _resolve_base_features_path()
 FEATURE_FACTORY = ChemicalFeatures.BuildFeatureFactory(FDEF_NAME)
 
 

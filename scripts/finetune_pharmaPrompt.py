@@ -39,6 +39,11 @@ warnings.filterwarnings("ignore")
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 phar_num_list = [1, 1, 1, 4, 6, 5, 2, 7]
+SPLIT_METHOD_ALIASES = {
+    'scaffold_345': 'scaffold',
+    'kpgt_vs': 'scaffold',
+}
+VALID_SPLIT_METHODS = ['random', 'kpgt', 'scaffold', 'ace', 'commn', 'MoleculeNet', 'vs']
 
 def init_params(module):
     if isinstance(module, nn.Linear):
@@ -135,7 +140,12 @@ def parse_args():
     parser.add_argument("--model_path", type=str, default=f'{base_path}/pretrained/base/base.pth')
     parser.add_argument("--dataset", type=str, default='')
     parser.add_argument("--data_path", type=str, default=f'{base_path}/datasets/ligand')
-    parser.add_argument("--split_method", type=str, default='kpgt_vs', choices=['random', 'kpgt', 'kpgt_vs', 'ace', 'commn','MoleculeNet','vs'])
+    parser.add_argument(
+        "--split_method",
+        type=str,
+        default='scaffold',
+        help="Split strategy. Supported values: random, kpgt, scaffold, ace, commn, MoleculeNet, vs. Legacy aliases: scaffold_345, kpgt_vs",
+    )
     parser.add_argument("--dataset_idx_start", type=int, default=0)
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--weight_decay", type=float, default=0)
@@ -183,6 +193,9 @@ def parse_args():
                        help='Minimum learning rate')
 
     args = parser.parse_args()
+    args.split_method = SPLIT_METHOD_ALIASES.get(args.split_method, args.split_method)
+    if args.split_method not in VALID_SPLIT_METHODS:
+        parser.error(f"invalid --split_method '{args.split_method}'")
     return args
 
 
@@ -650,7 +663,7 @@ def setup_dataset_config(dataset_name):
     elif dataset_name in ['EGFR','JAK1']:
         config['dataset_type'] = 'regression'
         config['metric'] = 'rmse,r2'
-    elif dataset_name in ['HPK1_IC50','FGFR1_IC50','VIM1_IC50']:
+    elif any(dataset_name.startswith(prefix) for prefix in ['HPK1_IC50', 'FGFR1_IC50', 'VIM1_IC50']):
         config['dataset_type'] = 'regression'
         config['metric'] = 'spear,pear'
     return config
@@ -668,7 +681,7 @@ def handle_split_method(args, data, all_results_dict,mode='finetune'):
             results_list = run_experiment(args, mode=mode)
             save_results(results_list, args)
             
-    elif args.split_method == 'kpgt_vs':
+    elif args.split_method == 'scaffold':
         for split_idx in [3,4,5]:
             args.split = f'scaffold-{split_idx}'
             results_list = run_experiment(args, mode=mode)

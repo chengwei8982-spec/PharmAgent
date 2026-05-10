@@ -1,19 +1,19 @@
-# PharmaPrompt
+# PharmAgent
 
-PharmaPrompt is a repository for molecular property training and attribution analysis.
+PharmAgent is a repository for molecular property training and attribution analysis.
 
 This public release keeps code and source datasets in GitHub, while model weights are distributed separately through Google Drive.
 
 
 ## Model Download
 
-The model weights and task-specific checkpoints:
+The following Google Drive folder that contains the required pretrained weights and task checkpoints:
 
-- `pharmaprompt_shared_models.zip`
+- Shared models archive
   https://drive.google.com/open?id=1d2LcD0o20lgS29cMaDQkC_E8q0JT_aYA
-- `pharmaprompt_chembert_den1.zip`
+- DEN1 support archive
   https://drive.google.com/open?id=1CSalCaThqyiedeGg0HR-oJVCIC1OyU87
-- `pharmaprompt_example_task_checkpoints.zip`
+- Task checkpoints archive
   https://drive.google.com/open?id=13xNV3TebAGDxsO4cNWYlmwXqXPpDmzb_
 
 After downloading, the repository should contain at least these paths:
@@ -27,82 +27,24 @@ checkpoints/DEN1/pytorch_model.bin
 save/<YOUR_TASK>/.../best_model.pth
 ```
 
-If you package the files as zip archives for Google Drive, unzip them at the repository root so the relative paths remain unchanged.
-
-Quick local check:
-
-```bash
-test -f pretrained/base/base.pth
-test -f pretrained/BiomedBERT/pytorch_model.bin
-test -f checkpoints/DEN1/pytorch_model.bin
-```
-
-The `DEN1` checkpoint is only required if you want to support code paths that instantiate the chembert SMILES encoder.
-
 ## Environment
 
-The recommended runtime is the `PharmAgent` conda environment.
+Use the  `PharmAgent` environment file:
 
 ```bash
+conda env create -f environment.pharmagent.yml
 conda activate PharmAgent
 ```
 
-If you are reproducing the environment from scratch, the repository provides two dependency entry points:
+Important notes:
 
-- `environment.yml`: the recommended conda base environment for Python, RDKit, and the scientific Python stack
-- `requirements.txt`: additional Python packages used across scripts
-
-Recommended installation order:
-
-```bash
-conda env create -f environment.yml
-conda activate PharmAgent
-pip install -r requirements.txt
-```
-
-The provided environment files cover the lightweight and common dependencies used by most scripts, including:
-
-- `numpy`
-- `pandas`
-- `scipy`
-- `scikit-learn`
-- `matplotlib`
-- `seaborn`
-- `tqdm`
-- `networkx`
-- `requests`
-- `lmdb`
-- `rdkit`
-- `transformers`
-- `ogb`
-- `tdc`
-- `python-Levenshtein`
-- `pandas-flavor`
-- `plip`
-
-Optional server-related dependencies are also included:
-
-- `fastapi<0.100`
-- `uvicorn[standard]`
-- `pydantic<2`
-
-Heavy GPU-sensitive packages are intentionally not pinned in `requirements.txt` because installation depends on your CUDA, PyTorch, and platform combination. Install these separately using the official instructions for your system:
-
-- `torch`
-- `dgl`
-- `torch-geometric`
-- `dgllife`
+- `environment.pharmagent.yml` is the closest match to the environment that was actually used to validate preprocessing, evaluation, and attribution on the current server.
+- The environment includes the training, evaluation, and attribution dependencies used in the validated server setup, including `torch`, `dgl`, `torch-geometric`, `dgllife`, and `shap`.
 
 Check the core dependencies:
 
 ```bash
 python -c "import torch, dgl, rdkit, shap; print('torch', torch.__version__); print('dgl_ok'); print('rdkit_ok'); print('shap_ok')"
-```
-
-For a minimal smoke test after environment setup, you can also run:
-
-```bash
-python -c "import numpy, pandas, scipy, sklearn, transformers, lmdb; print('basic_python_stack_ok')"
 ```
 
 ## Data
@@ -129,13 +71,13 @@ Notes:
 Inspect the training arguments first:
 
 ```bash
-python scripts/finetune_pharmaPrompt.py --help
+python scripts/finetune_pharmagent.py --help
 ```
 
 Minimal training example:
 
 ```bash
-python scripts/finetune_pharmaPrompt.py \
+python scripts/finetune_pharmagent.py \
   --mode finetune \
   --dataset HPK1_IC50 \
   --data_path "$(pwd)/datasets/ligand" \
@@ -144,7 +86,6 @@ python scripts/finetune_pharmaPrompt.py \
   --num_workers 0 \
   --n_epochs 1 \
   --batch_size 4 \
-  --use_amp true
 ```
 
 This workflow generates derived training artifacts such as:
@@ -156,38 +97,93 @@ This workflow generates derived training artifacts such as:
 - `phar_features_lmdb/`
 - `smiles_embeddings_chembert_lmdb/`
 
-## Attribution
+### Tiny HPK1 Smoke Test
 
-Inspect the available script arguments first:
+The following commands create and validate a tiny HPK1 dataset under `workspace/` without touching the full dataset under `datasets/ligand/`.
+
+1. Create a small CSV from the full HPK1 source file.
 
 ```bash
-python scripts/attribution_deepshap_single.py --help
+python - <<'PY'
+import pandas as pd
+
+df = pd.read_csv('datasets/ligand/HPK1_IC50/HPK1_IC50.csv')
+df.head(64).to_csv('workspace/HPK1_IC50_tiny.csv', index=False)
+print('wrote workspace/HPK1_IC50_tiny.csv')
+PY
 ```
 
-For attribution you typically need:
+2. Precompute graph, fingerprint, and descriptor features for the tiny dataset.
 
-- `pretrained/base/base.pth`
-- `pretrained/BiomedBERT/*`
-- One task-specific checkpoint under `save/.../best_model.pth`
+```bash
+python scripts/prepare_raw_dataset.py \
+  --input_csv "$(pwd)/workspace/HPK1_IC50_tiny.csv" \
+  --dataset_name HPK1_IC50_tiny \
+  --dataset_kind ligand \
+  --output_root "$(pwd)/workspace" \
+  --graph_n_jobs 4
+```
 
-For chembert-based SMILES encoder paths, also provide:
+3. Generate the extra split files required by the `scaffold` finetune and evaluate mode.
 
-- `checkpoints/DEN1/pytorch_model.bin`
+```bash
+for seed in 4 5; do
+  python scripts/preprocess_scaffold_split.py \
+    --root_path workspace \
+    --use_split_method random_scaffold_split \
+    --dataset HPK1_IC50_tiny \
+    --seed "$seed"
+done
+```
+
+4. Build the LMDB features required by training and evaluation.
+
+```bash
+python - <<'PY'
+from scripts.prepare_raw_dataset import build_feature_lmdbs
+
+build_feature_lmdbs(
+    dataset_dir='workspace/HPK1_IC50_tiny',
+    csv_path='workspace/HPK1_IC50_tiny/HPK1_IC50_tiny.csv',
+)
+PY
+```
+
+5. Run a tiny evaluation smoke test with the shared base checkpoint.
+
+```bash
+python scripts/finetune_pharmagent.py \
+  --mode evaluate \
+  --dataset HPK1_IC50_tiny \
+  --data_path "$(pwd)/workspace" \
+  --split_method scaffold \
+  --device cpu \
+  --num_runs 1 \
+  --num_workers 0 \
+  --batch_size 8 \
+  --model_path "$(pwd)/pretrained/base/base.pth" \
+  --alpha 0.1 \
+  --beta 0.1
+```
+
+This tiny evaluation path was validated on the current server and produced `Test_spear` / `Test_pear` outputs across the scaffold evaluation splits.
+
 
 ### Model Evaluation
 
 ```bash
-python scripts/finetune_pharmaPrompt.py \
+python scripts/finetune_pharmagent.py \
   --mode evaluate \
   --dataset HPK1_IC50 \
   --data_path "$(pwd)/datasets/ligand" \
   --device cuda:3 \
   --num_runs 1 \
   --num_workers 0 \
-  --batch_size 4
+  --batch_size 4 \
+  --model_path "$(pwd)/pretrained/base/base.pth"
 ```
 
-### Single-Molecule DeepSHAP Attribution
+### DeepSHAP Attribution
 
 The attribution script remains available, but the current public Google Drive release does not ship a dedicated attribution example checkpoint.
 
@@ -200,33 +196,3 @@ python scripts/attribution_deepshap_single.py \
   --background_n 2 \
   --ckpt_path /abs/path/to/your/best_model.pth
 ```
-
-If you only want to test the script logic without loading a model, run:
-
-```bash
-python scripts/attribution_deepshap_single.py --test_aggregation_only
-```
-
-## Google Drive Packaging Recommendation
-
-For the current public release, keep Google Drive organized in three layers:
-
-- Shared base models: `pretrained/base/` and `pretrained/BiomedBERT/`
-- ChemBERT support: `checkpoints/DEN1/pytorch_model.bin`
-- Task checkpoints: upload only the task directories you need for evaluation or attribution
-
-The current release uses these archive names:
-
-- `pharmaprompt_shared_models.zip`
-- `pharmaprompt_chembert_den1.zip`
-- `pharmaprompt_example_task_checkpoints.zip`
-
-The current practical release that covers the documented public workflows is:
-
-- shared base weights
-- `DEN1` if you want chembert path support
-- one compatible finetuned checkpoint for the task you want to evaluate or attribute
-
-If you want broader public task coverage later, add more `save/<TASK>/.../best_model.pth` files following the same relative layout.
-
-Additional checkpoints can be published later as separate follow-up releases.
