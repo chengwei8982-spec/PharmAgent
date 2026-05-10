@@ -1,6 +1,8 @@
 # PharmAgent
 
-PharmAgent is a repository for molecular property training and attribution analysis.
+PharmAgent is the code repository for PharmAgent: An Interpretable Pharmacophore-Guided Reasoning Agent for Drug Discovery.
+
+The project centers on pharmacophore-guided reasoning, aiming to provide predictive performance together with pharmacophore-level evidence that can be inspected in drug discovery workflows.
 
 This public release keeps code and source datasets in GitHub, while model weights are distributed separately through Google Drive.
 
