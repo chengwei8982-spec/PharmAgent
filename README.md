@@ -14,7 +14,7 @@ The following Google Drive folder that contains the required pretrained weights 
 - Shared models archive
   https://drive.google.com/open?id=1d2LcD0o20lgS29cMaDQkC_E8q0JT_aYA
 - DEN1 support archive
-  https://drive.google.com/open?id=1CSalCaThqyiedeGg0HR-oJVCIC1OyU87
+  https://drive.google.com/file/d/1CSalCaThqyiedeGg0HR-oJVCIC1OyU87/view?usp=sharing
 - Task checkpoints archive
   https://drive.google.com/open?id=13xNV3TebAGDxsO4cNWYlmwXqXPpDmzb_
 
