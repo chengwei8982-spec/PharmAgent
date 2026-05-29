@@ -271,9 +271,9 @@ def smiles_to_graph_phar(smiles, max_length=5, n_virtual_nodes=8, num_phars=7, a
     for atom_id in range(n_atoms):
         atom = mol.GetAtomWithIdx(atom_id)
         atom_features.append(
-            atom_featurizer_all(atom) + list(atom_phar_features[atom_id, :].bool().numpy()))  # 定义每个atom的feature
+            atom_featurizer_all(atom) + list(atom_phar_features[atom_id, :].bool().numpy()))  # define the feature vector for each atom
 
-    atomIDPair_to_tripletId = np.ones(shape=(n_atoms, n_atoms)) * np.nan  # 构建一个atom*atom的矩阵
+    atomIDPair_to_tripletId = np.ones(shape=(n_atoms, n_atoms)) * np.nan  # build an atom-by-atom matrix
     # Construct and Featurize Triplet Nodes
     ## bonded atoms
     virtual_atom_and_virtual_node_labels = []
@@ -283,28 +283,28 @@ def smiles_to_graph_phar(smiles, max_length=5, n_virtual_nodes=8, num_phars=7, a
 
     bonded_atoms = set()
     triplet_id = 0
-    for bond in mol.GetBonds():  # 遍历所有的bonds
+    for bond in mol.GetBonds():  # iterate over all bonds
         begin_atom_id, end_atom_id = np.sort(
-            [bond.GetBeginAtom().GetIdx(), bond.GetEndAtom().GetIdx()])  # 得到当前bond相关联的两个atom id
+            [bond.GetBeginAtom().GetIdx(), bond.GetEndAtom().GetIdx()])  # get the two atom ids connected by the current bond
         atom_pairs_features_in_triplets.append(
-            [atom_features[begin_atom_id], atom_features[end_atom_id]])  # 将这两个atom相应的特征拼接起来，放到atom pair特征中
-        bond_feature = bond_featurizer_all(bond)  # 得到当前bond的特征
-        bond_features_in_triplets.append(bond_feature)  # 将bond的特征保存下来
-        bonded_atoms.add(begin_atom_id)  # 保存计算过特征的atom id
-        bonded_atoms.add(end_atom_id)  # 保存计算过特征的atom id
-        virtual_atom_and_virtual_node_labels.append(0)  # 添加一个label，表示是否是虚拟的节点
+            [atom_features[begin_atom_id], atom_features[end_atom_id]])  # concatenate the two atom feature vectors into the atom-pair feature
+        bond_feature = bond_featurizer_all(bond)  # get the feature vector for the current bond
+        bond_features_in_triplets.append(bond_feature)  # store the current bond features
+        bonded_atoms.add(begin_atom_id)  # record atom ids whose features have been processed
+        bonded_atoms.add(end_atom_id)  # record atom ids whose features have been processed
+        virtual_atom_and_virtual_node_labels.append(0)  # add a label indicating whether this is a virtual node
         atomIDPair_to_tripletId[begin_atom_id, end_atom_id] = atomIDPair_to_tripletId[
-            end_atom_id, begin_atom_id] = triplet_id  # 存储当前的节点id，这个id和bond id一样，存储的位置是atom*atom的矩阵
+            end_atom_id, begin_atom_id] = triplet_id  # store the current node id, which matches the bond id, in the atom-by-atom matrix
         triplet_id += 1
     ## unbonded atoms
-    for atom_id in range(n_atoms):  # 遍历所有的节点
-        if atom_id not in bonded_atoms:  # 如果还有剩下没有遍历的节点（上面遍历边的时候剩下的节点）
+    for atom_id in range(n_atoms):  # iterate over all nodes
+        if atom_id not in bonded_atoms:  # handle any remaining nodes that were not covered when iterating over bonds
             atom_pairs_features_in_triplets.append([atom_features[atom_id], [
-                VIRTUAL_ATOM_FEATURE_PLACEHOLDER] * d_atom_feats])  # 将这个节点和一个虚拟节点特征（全为-1）一起放入atom pair特征中
-            bond_features_in_triplets.append([VIRTUAL_BOND_FEATURE_PLACEHOLDER] * d_bond_feats)  # 既然是虚拟节点，则添加的边也是虚拟的
-            virtual_atom_and_virtual_node_labels.append(VIRTUAL_ATOM_INDICATOR)  # 添加虚拟节点对应的label（-1）
+                VIRTUAL_ATOM_FEATURE_PLACEHOLDER] * d_atom_feats])  # append this node together with a virtual-node feature vector (all -1) to the atom-pair features
+            bond_features_in_triplets.append([VIRTUAL_BOND_FEATURE_PLACEHOLDER] * d_bond_feats)  # because this is a virtual node, the added edge is also virtual
+            virtual_atom_and_virtual_node_labels.append(VIRTUAL_ATOM_INDICATOR)  # add the label for the virtual node (-1)
 
-    # Construct and Featurize Paths between Triplets #得到path
+    # Construct and Featurize Paths between Triplets #construct the path features
     ## line graph paths
     edges = []
     paths = []
@@ -312,31 +312,31 @@ def smiles_to_graph_phar(smiles, max_length=5, n_virtual_nodes=8, num_phars=7, a
     mol_graph_path_labels = []
     virtual_path_labels = []
     self_loop_labels = []
-    for i in range(n_atoms):  # 遍历每一个atom
-        node_ids = atomIDPair_to_tripletId[i]  # 得到当前atom，与这个atom相关的所有atom
+    for i in range(n_atoms):  # iterate over each atom
+        node_ids = atomIDPair_to_tripletId[i]  # get all atoms associated with the current atom
         node_ids = node_ids[~np.isnan(node_ids)]
-        if len(node_ids) >= 2:  # 如果当前atom有与别的atom相连
-            new_edges = list(permutations(node_ids, 2))  # 构建这两个atom的边
-            edges.extend(new_edges)  # 存储这个边
+        if len(node_ids) >= 2:  # if the current atom is connected to other atoms
+            new_edges = list(permutations(node_ids, 2))  # build edges between the two atom-associated nodes
+            edges.extend(new_edges)  # store these edges
             new_paths = [[new_edge[0]] + [VIRTUAL_PATH_INDICATOR] * (max_length - 2) + [new_edge[1]] for new_edge in
-                         new_edges]  # 添加从这个起始点到终点的path，这个path中间通过-10000来填充
-            paths.extend(new_paths)  # 存储这个path
-            n_new_edges = len(new_edges)  # 得到当前边的个数
+                         new_edges]  # add the path from the start node to the end node, padding intermediate positions with -10000
+            paths.extend(new_paths)  # store the path
+            n_new_edges = len(new_edges)  # get the number of current edges
             line_graph_path_labels.extend([1] * n_new_edges)
             mol_graph_path_labels.extend([0] * n_new_edges)
             virtual_path_labels.extend([0] * n_new_edges)
             self_loop_labels.extend([0] * n_new_edges)
     # # molecule graph paths
-    adj_matrix = np.array(Chem.rdmolops.GetAdjacencyMatrix(mol))  # 构建当前节点的关联矩阵
-    nx_g = nx.from_numpy_array(adj_matrix)  # 利用当前的关联矩阵构建图
-    paths_dict = dict(nx.algorithms.all_pairs_shortest_path(nx_g, max_length + 1))  # 得到当前节点与任意节点的路径
-    for i in paths_dict.keys():  # 遍历这个路径
+    adj_matrix = np.array(Chem.rdmolops.GetAdjacencyMatrix(mol))  # build the adjacency matrix for the current molecule
+    nx_g = nx.from_numpy_array(adj_matrix)  # construct a graph from the current adjacency matrix
+    paths_dict = dict(nx.algorithms.all_pairs_shortest_path(nx_g, max_length + 1))  # compute paths from the current node to any other node
+    for i in paths_dict.keys():  # iterate over these paths
         for j in paths_dict[i]:
             path = paths_dict[i][j]
-            path_length = len(path)  # 判断当前节点是否存在多个路径
-            if 3 < path_length <= max_length + 1:  # 找到存在至少有4个节点的路径
+            path_length = len(path)  # check the path length for the current node pair
+            if 3 < path_length <= max_length + 1:  # find paths containing at least four nodes
                 triplet_ids = [atomIDPair_to_tripletId[path[pi], path[pi + 1]] for pi in
-                               range(len(path) - 1)]  # 找到这个路径上每个节点对应的value，也就是bond的id
+                               range(len(path) - 1)]  # retrieve the value for each node pair on this path, i.e. the bond id
                 path_start_triplet_id = triplet_ids[0]
                 path_end_triplet_id = triplet_ids[-1]
                 triplet_path = triplet_ids[1:-1]
@@ -401,8 +401,8 @@ def smiles_to_graph_tune(smiles, max_length=5, n_virtual_nodes=8, add_self_loop=
 
     for atom_id in range(n_atoms):
         atom = mol.GetAtomWithIdx(atom_id)
-        atom_features.append(atom_featurizer_all(atom))  # 定义每个atom的feature
-    atomIDPair_to_tripletId = np.ones(shape=(n_atoms, n_atoms)) * np.nan  # 构建一个atom*atom的矩阵
+        atom_features.append(atom_featurizer_all(atom))  # define the feature vector for each atom
+    atomIDPair_to_tripletId = np.ones(shape=(n_atoms, n_atoms)) * np.nan  # build an atom-by-atom matrix
     # Construct and Featurize Triplet Nodes
     ## bonded atoms
     virtual_atom_and_virtual_node_labels = []
@@ -412,28 +412,28 @@ def smiles_to_graph_tune(smiles, max_length=5, n_virtual_nodes=8, add_self_loop=
 
     bonded_atoms = set()
     triplet_id = 0
-    for bond in mol.GetBonds():  # 遍历所有的bonds
+    for bond in mol.GetBonds():  # iterate over all bonds
         begin_atom_id, end_atom_id = np.sort(
-            [bond.GetBeginAtom().GetIdx(), bond.GetEndAtom().GetIdx()])  # 得到当前bond相关联的两个atom id
+            [bond.GetBeginAtom().GetIdx(), bond.GetEndAtom().GetIdx()])  # get the two atom ids connected by the current bond
         atom_pairs_features_in_triplets.append(
-            [atom_features[begin_atom_id], atom_features[end_atom_id]])  # 将这两个atom相应的特征拼接起来，放到atom pair特征中
-        bond_feature = bond_featurizer_all(bond)  # 得到当前bond的特征
-        bond_features_in_triplets.append(bond_feature)  # 将bond的特征保存下来
-        bonded_atoms.add(begin_atom_id)  # 保存计算过特征的atom id
-        bonded_atoms.add(end_atom_id)  # 保存计算过特征的atom id
-        virtual_atom_and_virtual_node_labels.append(0)  # 添加一个label，表示是否是虚拟的节点
+            [atom_features[begin_atom_id], atom_features[end_atom_id]])  # concatenate the two atom feature vectors into the atom-pair feature
+        bond_feature = bond_featurizer_all(bond)  # get the feature vector for the current bond
+        bond_features_in_triplets.append(bond_feature)  # store the current bond features
+        bonded_atoms.add(begin_atom_id)  # record atom ids whose features have been processed
+        bonded_atoms.add(end_atom_id)  # record atom ids whose features have been processed
+        virtual_atom_and_virtual_node_labels.append(0)  # add a label indicating whether this is a virtual node
         atomIDPair_to_tripletId[begin_atom_id, end_atom_id] = atomIDPair_to_tripletId[
-            end_atom_id, begin_atom_id] = triplet_id  # 存储当前的节点id，这个id和bond id一样，存储的位置是atom*atom的矩阵
+            end_atom_id, begin_atom_id] = triplet_id  # store the current node id, which matches the bond id, in the atom-by-atom matrix
         triplet_id += 1
     ## unbonded atoms 
-    for atom_id in range(n_atoms):  # 遍历所有的节点
-        if atom_id not in bonded_atoms:  # 如果还有剩下没有遍历的节点（上面遍历边的时候剩下的节点）
+    for atom_id in range(n_atoms):  # iterate over all nodes
+        if atom_id not in bonded_atoms:  # handle any remaining nodes that were not covered when iterating over bonds
             atom_pairs_features_in_triplets.append([atom_features[atom_id], [
-                VIRTUAL_ATOM_FEATURE_PLACEHOLDER] * d_atom_feats])  # 将这个节点和一个虚拟节点特征（全为-1）一起放入atom pair特征中
-            bond_features_in_triplets.append([VIRTUAL_BOND_FEATURE_PLACEHOLDER] * d_bond_feats)  # 既然是虚拟节点，则添加的边也是虚拟的
-            virtual_atom_and_virtual_node_labels.append(VIRTUAL_ATOM_INDICATOR)  # 添加虚拟节点对应的label（-1）
+                VIRTUAL_ATOM_FEATURE_PLACEHOLDER] * d_atom_feats])  # append this node together with a virtual-node feature vector (all -1) to the atom-pair features
+            bond_features_in_triplets.append([VIRTUAL_BOND_FEATURE_PLACEHOLDER] * d_bond_feats)  # because this is a virtual node, the added edge is also virtual
+            virtual_atom_and_virtual_node_labels.append(VIRTUAL_ATOM_INDICATOR)  # add the label for the virtual node (-1)
 
-    # Construct and Featurize Paths between Triplets #得到path
+    # Construct and Featurize Paths between Triplets #construct the path features
     ## line graph paths
     edges = []
     paths = []
@@ -441,31 +441,31 @@ def smiles_to_graph_tune(smiles, max_length=5, n_virtual_nodes=8, add_self_loop=
     mol_graph_path_labels = []
     virtual_path_labels = []
     self_loop_labels = []
-    for i in range(n_atoms):  # 遍历每一个atom
-        node_ids = atomIDPair_to_tripletId[i]  # 得到当前atom，与这个atom相关的所有atom
+    for i in range(n_atoms):  # iterate over each atom
+        node_ids = atomIDPair_to_tripletId[i]  # get all atoms associated with the current atom
         node_ids = node_ids[~np.isnan(node_ids)]
-        if len(node_ids) >= 2:  # 如果当前atom有与别的atom相连
-            new_edges = list(permutations(node_ids, 2))  # 构建这两个atom的边
-            edges.extend(new_edges)  # 存储这个边
+        if len(node_ids) >= 2:  # if the current atom is connected to other atoms
+            new_edges = list(permutations(node_ids, 2))  # build edges between the two atom-associated nodes
+            edges.extend(new_edges)  # store these edges
             new_paths = [[new_edge[0]] + [VIRTUAL_PATH_INDICATOR] * (max_length - 2) + [new_edge[1]] for new_edge in
-                         new_edges]  # 添加从这个起始点到终点的path，这个path中间通过-10000来填充
-            paths.extend(new_paths)  # 存储这个path
-            n_new_edges = len(new_edges)  # 得到当前边的个数
+                         new_edges]  # add the path from the start node to the end node, padding intermediate positions with -10000
+            paths.extend(new_paths)  # store the path
+            n_new_edges = len(new_edges)  # get the number of current edges
             line_graph_path_labels.extend([1] * n_new_edges)
             mol_graph_path_labels.extend([0] * n_new_edges)
             virtual_path_labels.extend([0] * n_new_edges)
             self_loop_labels.extend([0] * n_new_edges)
     # # molecule graph paths
-    adj_matrix = np.array(Chem.rdmolops.GetAdjacencyMatrix(mol))  # 构建当前节点的关联矩阵
-    nx_g = nx.from_numpy_array(adj_matrix)  # 利用当前的关联矩阵构建图
-    paths_dict = dict(nx.algorithms.all_pairs_shortest_path(nx_g, max_length + 1))  # 得到当前节点与任意节点的路径
-    for i in paths_dict.keys():  # 遍历这个路径
+    adj_matrix = np.array(Chem.rdmolops.GetAdjacencyMatrix(mol))  # build the adjacency matrix for the current molecule
+    nx_g = nx.from_numpy_array(adj_matrix)  # construct a graph from the current adjacency matrix
+    paths_dict = dict(nx.algorithms.all_pairs_shortest_path(nx_g, max_length + 1))  # compute paths from the current node to any other node
+    for i in paths_dict.keys():  # iterate over these paths
         for j in paths_dict[i]:
             path = paths_dict[i][j]
-            path_length = len(path)  # 判断当前节点是否存在多个路径
-            if 3 < path_length <= max_length + 1:  # 找到存在至少有4个节点的路径
+            path_length = len(path)  # check the path length for the current node pair
+            if 3 < path_length <= max_length + 1:  # find paths containing at least four nodes
                 triplet_ids = [atomIDPair_to_tripletId[path[pi], path[pi + 1]] for pi in
-                               range(len(path) - 1)]  # 找到这个路径上每个节点对应的value，也就是bond的id
+                               range(len(path) - 1)]  # retrieve the value for each node pair on this path, i.e. the bond id
                 path_start_triplet_id = triplet_ids[0]
                 path_end_triplet_id = triplet_ids[-1]
                 triplet_path = triplet_ids[1:-1]

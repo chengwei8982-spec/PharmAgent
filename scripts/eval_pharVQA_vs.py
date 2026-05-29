@@ -261,9 +261,9 @@ def init_model(args, device, config, vocab, train_dataset,text_model=None):
         k=3).to(device)
         # model.prompt_fusion = OneStagePromptFusion().to(device)
         model.prompt_fusion = TwoStagePromptFusion(
-            dim=config['BAN']['out_dim'],  # 使用BAN的输出维度
+            dim=config['BAN']['out_dim'],  # use BAN output dimensionality
             dim_out=config['head']['out_dim'],
-            phar_num_list=phar_num_list,   # 8个药效团组
+            phar_num_list=phar_num_list,   # 8 pharmacophore groups
             dropout=args.dropout,
             projection_layers=args.projection_layers,
             d_hidden_feats=config['head']['out_dim']
@@ -281,9 +281,9 @@ def init_model(args, device, config, vocab, train_dataset,text_model=None):
             fusion_method=args.KBAN_fusion_method).to(device)
 
         model.prompt_fusion = TwoStagePromptFusion(
-            dim=config['BAN']['out_dim'],  # 使用BAN的输出维度
+            dim=config['BAN']['out_dim'],  # use BAN output dimensionality
             dim_out=config['head']['out_dim'],
-            phar_num_list=phar_num_list,   # 8个药效团组
+            phar_num_list=phar_num_list,   # 8 pharmacophore groups
             dropout=args.dropout,
             projection_layers=args.projection_layers,
             d_hidden_feats=config['head']['out_dim']
@@ -292,7 +292,7 @@ def init_model(args, device, config, vocab, train_dataset,text_model=None):
     model.prompt_linear_model = get_predictor(d_input_feats=config['BAN']['out_dim'], n_tasks=1, n_layers=args.n_layers,
                                                     predictor_drop=args.dropout, device=device, d_hidden_feats=256)
     model.predictor = get_predictor(
-        d_input_feats=config['head']['out_dim'] +  base_config['d_g_feats'],  # 8 * D 维的输入
+        d_input_feats=config['head']['out_dim'] +  base_config['d_g_feats'],  # 8 * D dimensional input
         n_tasks=1,
         n_layers=args.n_layers,
         predictor_drop=args.dropout,
@@ -913,7 +913,7 @@ def eval_drugbank(args):
     # load model
     model_state_dict = torch.load(args.load_model_path, map_location='cpu')
     new_state_dict = {}
-    # 遍历 state_dict 中的每个键值对，修改键名
+    # Iterate over each key-value pair in the state_dict and rename keys
     for key, value in model_state_dict.items():
         # if key.startswith('bcn_list'):
         #     continue
@@ -922,7 +922,7 @@ def eval_drugbank(args):
             new_key = key.replace('graph_feature_extractor.', 'base_feature_extractor.')
         else:
             new_key = key
-        # 将修改后的键和值存入新的字典中
+        # Store the renamed keys and values in the new dictionary
         new_state_dict[new_key] = value
     model.load_state_dict(new_state_dict)
 
@@ -1011,7 +1011,7 @@ def eval_drugbank(args):
                     predictions = ((predictions * std) + mean)
 
                 pred_numpy = predictions.detach().cpu().numpy()
-                if pred_numpy.ndim == 0:  # 0维数组（单个数值）
+                if pred_numpy.ndim == 0:  # 0-dimensional array (single scalar)
                     predictions_all.append(pred_numpy)
                 else:
                     predictions_all.extend(pred_numpy.flatten())
@@ -1040,14 +1040,14 @@ if __name__ == '__main__':
         ref_df = ref_df.loc[:, ['Name','DrugBank ID', 'SMILES','ChEMBL ID']]
         ref_df.dropna(inplace=True)
 
-        # 创建一个辅助DataFrame，用于排序
+        # Create a helper DataFrame for sorting
         df_sorted['Order'] = range(len(smiles_list))
 
-        # 合并DataFrames，根据SMILES匹配
+        # Merge DataFrames by matching SMILES
         df_merged = ref_df.merge(df_sorted, on='SMILES', how='right')
 
-        # 根据Order列排序
-        df_sorted = df_merged.sort_values(by='Order').drop(columns=['Order'])  # 移除辅助列
+        # Sort by the Order column
+        df_sorted = df_merged.sort_values(by='Order').drop(columns=['Order'])  # remove the helper column
 
         df_sorted.to_csv(
             f'{args.save_path}/{args.dataset}_questionNum{args.num_questions}_{args.split}_{args.model_name}_eval_filter_top20_.csv',

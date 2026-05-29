@@ -115,9 +115,9 @@ def init_model(args, device, config, vocab, train_dataset,text_model=None):
     ).to(device)
     
     model.prompt_fusion = TwoStagePromptFusion(
-        dim=config['BAN']['out_dim'],  # 使用BAN的
+        dim=config['BAN']['out_dim'],  # use BAN
         dim_out=config['head']['out_dim'],
-        phar_num_list=phar_num_list,   # 8个药效团组
+        phar_num_list=phar_num_list,   # 8 pharmacophore groups
         dropout=args.dropout,
         projection_layers=args.projection_layers,
         d_hidden_feats=config['head']['out_dim']
@@ -126,7 +126,7 @@ def init_model(args, device, config, vocab, train_dataset,text_model=None):
     model.prompt_linear_model = get_predictor(d_input_feats=config['BAN']['out_dim'], n_tasks=1, n_layers=args.projection_layers,
                                                 predictor_drop=args.dropout,d_hidden_feats=256)
     # model.predictor = get_predictor(
-    #     d_input_feats=config['head']['out_dim'] + base_config['d_g_feats'],  # 8 * D 维的输入
+    #     d_input_feats=config['head']['out_dim'] + base_config['d_g_feats'],  # 8 * D dimensional input
     #     n_tasks=train_dataset.n_tasks,
     #     n_layers=args.n_layers,
     #     predictor_drop=args.dropout,
@@ -360,7 +360,7 @@ class pharmagent_CPI(torch.nn.Module):
             protein_mask = torch.ones((data_pro_len.shape[0], xt.shape[1]), device=self.args.device)
             molecules_mask = torch.ones((data_pro_len.shape[0], molecules_reprs_.shape[1]), device=self.args.device)
             for i in range(data_pro_len.shape[0]):
-                protein_mask[i, pro_seq_lengths[i]:] = 0  # 将超过有效长度的部分设为 0
+                protein_mask[i, pro_seq_lengths[i]:] = 0  # set positions beyond the valid length to 0
 
             # output, atten_protein_ligand = self.atten_encoder(xt, molecules_reprs_, protein_mask, molecules_mask)
 

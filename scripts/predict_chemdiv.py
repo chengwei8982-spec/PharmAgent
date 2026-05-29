@@ -69,14 +69,14 @@ def get_predictor(d_input_feats, n_tasks, n_layers, predictor_drop, device, d_hi
 def parse_args():
     parser = argparse.ArgumentParser(description="Predict ChemDiv dataset using trained model")
     
-    # 基本参数
+    # Basic parameters
     parser.add_argument("--device", type=str, default='cuda:0')
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--num_workers", type=int, default=0)
     parser.add_argument("--max_length", type=int, default=128)
     
-    # 模型参数
+    # Model parameters
     parser.add_argument("--model_name", type=str, default='JAK1',
                        help="Name of the model")
     parser.add_argument("--config", type=str, default='base')
@@ -84,12 +84,12 @@ def parse_args():
     parser.add_argument("--n_layers", type=int, default=2)
     parser.add_argument("--projection_layers", type=int, default=2)
     
-    # 数据路径
+    # Data paths
     parser.add_argument("--data_path", type=str, 
                        default='/workspace/aichengwei/code/own/KPGT-main/datasets/',
                        help="Path to ChemDiv dataset")
 
-    # 模型配置
+    # Model configuration
     parser.add_argument("--text_model_name", type=str, default='pubmed')
     parser.add_argument("--smiles_model_name", type=str, default='chembert')
     parser.add_argument("--train_text_model", type=str2bool, default=False)
@@ -103,7 +103,7 @@ def parse_args():
     parser.add_argument("--ace_clip_test", type=str2bool, default=False)
     parser.add_argument("--use_norm_reg", type=str2bool, default=True)
     parser.add_argument("--debug", type=str2bool, default=True)
-    # 其他参数
+    # Other parameters
     parser.add_argument("--alpha", type=float, default=0.1)
     parser.add_argument("--beta", type=float, default=0.1)
     parser.add_argument("--use_phar_loss", type=str2bool, default=True)
@@ -282,14 +282,14 @@ def init_model(args, device, config, vocab, train_dataset, text_model=None):
     return model
 
 def create_chemdiv_dataset(args):
-    """创建ChemDiv数据集"""
+    """Create the ChemDiv dataset."""
     dataset_params = {
         'root_path': args.data_path,
         'dataset': 'chemdiv',
         'path_length': 5,
         'debug': args.debug,
         'seed': args.seed,
-        'index': None  # 使用所有数据
+        'index': None  # use all data
     }
 
     dataset = pharmagentDataset_chemdiv(**dataset_params)
@@ -343,7 +343,7 @@ def test(model, device, loader, text_model, text_dict):
     return smiles_list, total_preds.numpy().flatten()
 
 def predict_chemdiv(args):
-    """预测ChemDiv数据集"""
+    """Predict the ChemDiv dataset."""
     device = torch.device(args.device if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
 
@@ -357,23 +357,23 @@ def predict_chemdiv(args):
     print(f"Model path: {args.model_path}")
     print(f"Output directory: {args.output_dir}")
     
-    # 设置随机种子
+    # Set the random seed
     set_random_seed(args.seed)
     
-    # 初始化词汇表
+    # Initialize the vocabulary
     vocab = Vocab(N_ATOM_TYPES, N_BOND_TYPES)
     
-    # 创建collator
+    # Create the collator
     collator = Collator_pharmagent_chemdiv(args.max_length)
 
-    # 获取文本问题嵌入
+    # Get text question embeddings
     text_dict, text_model = get_question_embeddings(args)
 
-    # 创建ChemDiv数据集
+    # Create the ChemDiv dataset
     dataset = create_chemdiv_dataset(args)
     print(f"Loaded {len(dataset)} molecules from ChemDiv dataset")
 
-    # 创建数据加载器
+    # Create the data loader
     dataloader = DataLoader(
         dataset,
         batch_size=args.batch_size,
@@ -383,7 +383,7 @@ def predict_chemdiv(args):
         num_workers=args.num_workers
     )
 
-    # 初始化模型
+    # Initialize the model
     model = init_model(args, device, config_dict, vocab, dataset, text_model)
     smiles_model = TextEncoder(model_name=args.smiles_model_name, load=True)
     
@@ -398,14 +398,14 @@ def predict_chemdiv(args):
     print(f"Model loaded with {sum(x.numel() for x in model.parameters()) / 1e6:.1f}M parameters")
     print(f"Smiles model loaded with {sum(x.numel() for x in smiles_model.parameters()) / 1e6:.1f}M parameters")
     
-    # 预测
+    # Run prediction
     predictions = []
     smiles_list = []
     
     print("Starting prediction...")
     smiles_list, predictions = test(model, device, dataloader, smiles_model, text_dict)
 
-    # 如果数据集有标准化参数，进行反标准化
+    # Apply inverse normalization if the dataset has normalization parameters
     if args.use_norm_reg:
         try:
             _, label_dict = load_graphs(args.model_data_graph_path)
@@ -418,7 +418,7 @@ def predict_chemdiv(args):
             print(f"Warning: Could not apply normalization: {e}")
             print("Using raw predictions")
     
-    # 保存结果
+    # Save results
     results_df = pd.DataFrame({
         'smiles': smiles_list,
         'prediction': predictions.flatten()
@@ -429,7 +429,7 @@ def predict_chemdiv(args):
     print(f"Predictions saved to: {output_path}")
     print(f"Predicted {len(predictions)} molecules")
     
-    # 显示一些统计信息
+    # Display summary statistics
     print(f"Prediction statistics:")
     print(f"Mean: {predictions.mean():.4f}")
     print(f"Std: {predictions.std():.4f}")

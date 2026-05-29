@@ -16,7 +16,7 @@ from src.data.splitters import random_split, random_scaffold_split, scaffold_spl
 
 
 def parse_args():
-    """解析命令行参数"""
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description="Arguments for training pharmaVQA")
     parser.add_argument('--root_path', type=str, default='datasets/vs/')
     parser.add_argument('--use_split_method', type=str, default='random_scaffold_split')
@@ -27,20 +27,20 @@ def parse_args():
 
 
 def load_smiles_data(dataset_path):
-    """加载SMILES数据"""
+    """Load SMILES data."""
     try:
         smiles_list = pd.read_csv(dataset_path)['smiles'].dropna().tolist()
     except KeyError:
         try:
             smiles_list = pd.read_csv(dataset_path)['SMILES'].dropna().tolist()
         except KeyError:
-            raise ValueError(f"CSV文件中没有找到'smiles'或'SMILES'列: {dataset_path}")
+            raise ValueError(f"Could not find a 'smiles' or 'SMILES' column in CSV: {dataset_path}")
     
     return smiles_list
 
 
 def create_split_directory(root_path, dataset):
-    """创建分割目录"""
+    """Create the split directory."""
     split_path = os.path.join(root_path, f"{dataset}/splits/")
     if not os.path.exists(split_path):
         os.makedirs(split_path)
@@ -48,16 +48,16 @@ def create_split_directory(root_path, dataset):
 
 
 def save_split_indices(split_path, train_index, valid_index, test_index, filename):
-    """保存分割索引"""
+    """Save split indices."""
     save_index = [train_index.numpy(), valid_index.numpy(), test_index.numpy()]
     merged_array = np.array(save_index)
     filepath = os.path.join(split_path, filename)
     np.save(filepath, merged_array)
-    print(f"分割索引已保存到: {filepath}")
+    print(f"Split indices saved to: {filepath}")
 
 
 def process_use_recommend_split(dataset, dataset_path, root_path, seed):
-    """处理推荐分割方法"""
+    """Process the recommended split method."""
     smiles_list = pd.read_csv(dataset_path)['smiles'].dropna().tolist()
     print(f'{dataset} has {len(smiles_list)} smiles')
 
@@ -66,14 +66,14 @@ def process_use_recommend_split(dataset, dataset_path, root_path, seed):
     elif dataset in ['bace', 'bbbp', 'hiv']:
         train_index, valid_index, test_index = balanced_scaffold_split(smiles_list, balanced=True)
     else:
-        raise ValueError(f"未知的数据集: {dataset}")
+        raise ValueError(f"Unknown dataset: {dataset}")
 
     split_path = create_split_directory(root_path, dataset)
     save_split_indices(split_path, train_index, valid_index, test_index, "scaffold-MoleculeNet.npy")
 
 
 def process_random_scaffold_split(dataset, dataset_path, root_path, seeds):
-    """处理随机骨架分割方法"""
+    """Process random scaffold splitting."""
     smiles_list = load_smiles_data(dataset_path)
     print(f'{dataset} has {len(smiles_list)} smiles')
     
@@ -89,7 +89,7 @@ def process_random_scaffold_split(dataset, dataset_path, root_path, seeds):
 
 
 def process_common_scaffold_split(dataset, dataset_path, root_path, use_split_method):
-    """处理通用骨架分割方法"""
+    """Process the common scaffold split method."""
     smiles_list = pd.read_csv(dataset_path)['smiles'].dropna().tolist()
     print(f'{dataset} has {len(smiles_list)} smiles')
     
@@ -103,7 +103,7 @@ def process_common_scaffold_split(dataset, dataset_path, root_path, use_split_me
 
 
 def process_stratified_scaffold_split(dataset, dataset_path, root_path, use_split_method):
-    """处理分层骨架分割方法"""
+    """Process stratified scaffold splitting."""
     smile_df = pd.read_csv(dataset_path).dropna()
     smiles_list = smile_df['smiles'].tolist()
     print(f'{dataset} has {len(smiles_list)} smiles')
@@ -120,19 +120,19 @@ def process_stratified_scaffold_split(dataset, dataset_path, root_path, use_spli
 
 
 def process_dataset(dataset, root_path, use_split_method, seeds):
-    """处理单个数据集"""
-    print(f"\n开始处理数据集: {dataset}")
+    """Process a single dataset."""
+    print(f"\nStart processing dataset: {dataset}")
     
-    # 跳过不需要的数据集
+    # Skip datasets that are not needed
     if dataset in ['DrugBank']:
-        print(f"跳过数据集: {dataset}")
+        print(f"Skip dataset: {dataset}")
         return
     
     dataset_path = os.path.join(root_path, f"{dataset}/{dataset}.csv")
     
-    # 检查文件是否存在
+    # Check whether the file exists
     if not os.path.exists(dataset_path):
-        print(f"警告: 文件不存在 {dataset_path}")
+        print(f"Warning: file does not exist: {dataset_path}")
         return
     
     try:
@@ -147,23 +147,23 @@ def process_dataset(dataset, root_path, use_split_method, seeds):
         elif use_split_method == 'balanced':
             smiles_list = pd.read_csv(dataset_path)['smiles'].dropna().tolist()
             print(f'{dataset} has {len(smiles_list)} smiles')
-            # TODO: 实现balanced分割方法
+            # TODO: Implement the balanced split method
         else:
-            print(f"警告: 未知的分割方法: {use_split_method}")
+            print(f"Warning: unknown split method: {use_split_method}")
             return
             
-        print(f"完成数据集 {dataset} 的分割处理")
+        print(f"Finished split processing for dataset {dataset}")
         
     except Exception as e:
-        print(f"处理数据集 {dataset} 时出错: {str(e)}")
+        print(f"Error while processing dataset {dataset}: {str(e)}")
 
 
 def main():
-    """主函数"""
+    """Main entry point."""
     args = parse_args()
     root_path = f'{path}/{args.root_path}'
     
-    # 确定要处理的数据集列表
+    # Determine which datasets to process
     if args.dataset:
         data_list = [args.dataset]
     else:
@@ -172,16 +172,16 @@ def main():
     use_split_method = args.use_split_method
     seeds = [args.seed]
     
-    print(f"根路径: {root_path}")
-    print(f"分割方法: {use_split_method}")
-    print(f"种子: {seeds}")
-    print(f"数据集列表: {data_list}")
+    print(f"Root path: {root_path}")
+    print(f"Split method: {use_split_method}")
+    print(f"Seeds: {seeds}")
+    print(f"Dataset list: {data_list}")
     
-    # 处理每个数据集
+    # Process each dataset
     for dataset in data_list:
         process_dataset(dataset, root_path, use_split_method, seeds)
     
-    print(f"\n所有数据集处理完成!")
+    print(f"\nAll datasets have been processed!")
 
 
 if __name__ == '__main__':

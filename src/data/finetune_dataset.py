@@ -539,7 +539,7 @@ class pharmagentDataset_chemdiv(Dataset):
         env = lmdb.open(self.phar_path, readonly=True)
         with env.begin() as txn:
             if self.debug:
-                # 在debug模式下只读取前100个keys
+                # In debug mode, only read the first 100 keys
                 keys = []
                 cursor = txn.cursor()
                 for i, (key, _) in enumerate(cursor):
@@ -547,7 +547,7 @@ class pharmagentDataset_chemdiv(Dataset):
                         break
                     keys.append(key.decode())
             else:
-                # 正常模式下读取所有keys
+                # In normal mode, read all keys
                 keys = [key.decode() for key, _ in txn.cursor()]
         env.close()
         return keys
@@ -679,7 +679,7 @@ class pharmagentDataset_approved(Dataset):
         env = lmdb.open(self.phar_path, readonly=True)
         with env.begin() as txn:
             if self.debug:
-                # 在debug模式下只读取前100个keys
+                # In debug mode, only read the first 100 keys
                 keys = []
                 cursor = txn.cursor()
                 for i, (key, _) in enumerate(cursor):
@@ -687,7 +687,7 @@ class pharmagentDataset_approved(Dataset):
                         break
                     keys.append(key.decode())
             else:
-                # 正常模式下读取所有keys
+                # In normal mode, read all keys
                 keys = [key.decode() for key, _ in txn.cursor()]
         env.close()
         return keys

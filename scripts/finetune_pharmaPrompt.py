@@ -326,10 +326,10 @@ def init_dataset(args, g, collator, phar_question_name):
     print(f"Validation set: {len(val_dataset)} samples")
     print(f"Test set: {len(test_dataset)} samples\n")
 
-    # 设置多进程参数，避免序列化问题
+    # Configure multiprocessing settings to avoid serialization issues
     multiprocessing_kwargs = {}
     if args.num_workers > 0:
-        # 设置多进程共享策略
+        # Set the multiprocessing sharing strategy
         torch.multiprocessing.set_sharing_strategy('file_system')
         multiprocessing_kwargs = {
             'num_workers': args.num_workers,
@@ -337,7 +337,7 @@ def init_dataset(args, g, collator, phar_question_name):
             'generator': g,
         }
     else:
-        # 单进程模式
+        # Single-process mode
         multiprocessing_kwargs = {
             'num_workers': 0,
             'generator': g,
@@ -515,10 +515,10 @@ def finetune(args, seed):
                            label_std=train_dataset.std.to(device) if train_dataset.std is not None else None,
                            scaler=scaler)
     
-    # 添加：在训练完成后提取分子表示向量
+    # Add extraction of molecular representation vectors after training
     best_train, best_val, best_test = trainer.fit(model, train_loader, val_loader, test_loader, text_dict)
     
-    # 新增：提取分子表示向量用于可视化分析
+    # New: extract molecular representation vectors for visualization analysis
     # print("Extracting molecular representations for visualization...")
     # extract_molecular_representations(model, test_loader, text_dict, device, save_path, train_dataset)
     
@@ -535,35 +535,35 @@ def finetune(args, seed):
 
 
 def evaluation(args, seed=None):
-    """评估函数，用于在预训练模型上进行推理"""
+    """Evaluation function for inference with the pretrained model."""
     if seed is None:
         seed = args.seed
     
     device = torch.device(args.device if torch.cuda.is_available() else 'cpu')
     print(f"Evaluating on dataset {args.dataset}, split {args.split}, seed {seed}")
     
-    # 初始化词汇表和生成器
+    # Initialize the vocabulary and generator
     vocab = Vocab(N_ATOM_TYPES, N_BOND_TYPES)
     g = torch.Generator()
     g.manual_seed(seed)
     
-    # 创建保存路径
+    # Create the save path
     save_path = create_save_path(args, seed)
     args.save_path = save_path
     # Keep evaluation and finetuning on the same collator to avoid
     # diverging batch formats between the two code paths.
     collator = Collator_pharmagent(args.max_length)
 
-    # 获取文本问题嵌入
+    # Get text question embeddings
     text_dict, text_model = get_question_embeddings(args)
 
-    # 初始化数据集
+    # Initialize the dataset
     train_loader, val_loader, test_loader, train_dataset = init_dataset(args, g, collator, text_dict['phar_question_name'])
     
-    # 初始化模型
+    # Initialize the model
     model = init_model(args, device, config_dict, vocab, train_dataset, text_model)
     
-    # 设置为评估模式
+    # Set the model to evaluation mode
     model.eval()
     print("Model have {}M parameters in total".format(sum(x.numel() for x in model.parameters()) / 1e6))
     print('Text model have {}M parameters in total'.format(sum(x.numel() for x in text_model.parameters()) / 1e6))
@@ -573,7 +573,7 @@ def evaluation(args, seed=None):
     else:
         print('Text model is trainable: {}'.format(True))
     
-    # 初始化损失函数和评估器 - 与finetune保持一致
+    # Initialize the loss function and evaluator to match finetuning
     if args.dataset_type == 'classification':
         loss_fn = BCEWithLogitsLoss(reduction='none')
         evaluator = Evaluator(args.dataset, args.metric, train_dataset.n_tasks)
@@ -587,20 +587,20 @@ def evaluation(args, seed=None):
     align_loss_fn = attention_alignment_loss
     phar_evaluator = Evaluator(args.dataset, 'rmse', 27)
     
-    # 初始化结果跟踪器
+    # Initialize the result tracker
     result_tracker = Result_Tracker(args.metric)
     
-    # 创建tensorboard writer
+    # Create the TensorBoard writer
     starttime = strftime("%Y-%m-%d_%H-%M-%S")
     summary_writer = SummaryWriter(
         f"{args.save_path}/tensorboard/st{starttime}",
         comment=starttime
     )
     
-    # 创建scaler
+    # Create the gradient scaler
     scaler = torch.cuda.amp.GradScaler(enabled=args.use_amp)
     
-    # 创建trainer - 与finetune保持一致
+    # Create the trainer to match finetuning
     trainer = Trainer_pharmaQA(args, None, None, loss_fn, phar_loss_fn, align_loss_fn, evaluator,
                            phar_evaluator, result_tracker,
                            summary_writer, device_id=device,
@@ -608,13 +608,13 @@ def evaluation(args, seed=None):
                            label_std=train_dataset.std.to(device) if train_dataset.std is not None else None,
                            scaler=scaler)
     
-    # 使用trainer进行评估
+    # Run evaluation with the trainer
     print("Starting evaluation on test set...")
     test_results, predictions_all, labels_all = trainer.eval(model, test_loader, 0, text_dict)
     
     print(f"Evaluation completed!")
     
-    # 保存预测结果
+    # Save prediction results
     if (train_dataset.mean is not None) and (train_dataset.std is not None):
         predictions_all = predictions_all * train_dataset.std.detach().cpu() + train_dataset.mean.detach().cpu()
     
@@ -623,7 +623,7 @@ def evaluation(args, seed=None):
                fmt='%.4f',
                header='Predictions,Labels')
     
-    # Print results - 与finetune保持一致
+    # Print results to match finetuning
     if ',' in args.metric:
         for index, metric in enumerate(args.metric.split(',')):
             print(f"Test_{metric}: {test_results[index]:.3f}")
@@ -743,12 +743,12 @@ if __name__ == '__main__':
 
 def generate_visualization_config(data_dir, representation_dim):
     """
-    生成可视化配置文件
+    Generate the visualization config file
     """
     config = {
         'data': {
             'pharmaqa_representations': os.path.join(data_dir, 'pharmaqa_representations.npy'),
-            'kpgt_representations': os.path.join(data_dir, 'kpgt_representations.npy'),  # 需要你自己提供
+            'kpgt_representations': os.path.join(data_dir, 'kpgt_representations.npy'),  # must be provided separately
             'molecule_labels': os.path.join(data_dir, 'molecule_labels.npy'),
             'molecule_smiles': os.path.join(data_dir, 'molecule_smiles.csv'),
             'pharmacophore_features': os.path.join(data_dir, 'pharmacophore_features.npy'),

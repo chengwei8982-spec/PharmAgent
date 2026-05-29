@@ -57,7 +57,7 @@ class KBANLayer(nn.Module):
         self.h_out = h_out
         self.fusion_method = fusion_method
 
-        # 改进后的特征提取网络
+        # Improved feature extraction network
         self.v_net = FCNet_ca([v_dim, h_dim * self.k], act='GELU', norm='LayerNorm', residual=True)
         self.q_net = FCNet_ca([q_dim, h_dim * self.k], act='Swish', dropout=dropout)
         self.k_net = nn.Sequential(
@@ -112,20 +112,20 @@ class KBANLayer(nn.Module):
                 key=k_.transpose(0, 1),
                 value=k_.transpose(0, 1)
             )
-            v_ = v_ + k_cross.transpose(0, 1)  # 残差连接
+            v_ = v_ + k_cross.transpose(0, 1)  # residual connection
         elif self.fusion_method == 'qk':
             k_cross, _ = self.k_cross_attn(
                 query=q_.transpose(0, 1),
                 key=k_.transpose(0, 1),
                 value=k_.transpose(0, 1)
             )
-            q_ = q_ + k_cross.transpose(0, 1)  # 残差连接
+            q_ = q_ + k_cross.transpose(0, 1)  # residual connection
         elif self.fusion_method == 'bi_qk':
             q_fused = self.k_cross_attn_f(query=q_.transpose(0, 1), key=k_.transpose(0, 1), value=k_.transpose(0, 1))[
                 0].transpose(0, 1)
             k_fused = self.k_cross_attn_b(query=k_.transpose(0, 1), key=q_.transpose(0, 1), value=q_.transpose(0, 1))[
                 0].transpose(0, 1)
-            # Key/Value由融合后的q和k拼接组成
+            # Key/value are formed by concatenating the fused q and k tensors
             q_ = torch.cat([q_fused, k_fused], dim=1)  # [B, q_len+k_len, h]
             q_mask = torch.cat([q_mask, k_mask], dim=-1)
 
@@ -156,7 +156,7 @@ class FCNet_ca(nn.Module):
         if isinstance(act, str):
             act = act_dict.get(act, nn.ReLU())
 
-        # 归一化层
+        # Normalization layers
         norm_layers = {
             'BatchNorm': nn.BatchNorm1d,
             'LayerNorm': nn.LayerNorm,
@@ -164,22 +164,22 @@ class FCNet_ca(nn.Module):
         }
         norm_layer = norm_layers.get(norm, None)
 
-        # 构建网络
+        # Build network layers
         for i in range(len(dims) - 1):
             in_dim, out_dim = dims[i], dims[i + 1]
             layers.append(weight_norm(nn.Linear(in_dim, out_dim), dim=None))
 
-            # 初始化
+            # Initialization
             if init == 'kaiming':
                 kaiming_normal_(layers[-1].weight, mode='fan_in', nonlinearity='relu')
             elif init == 'xavier':
                 nn.init.xavier_normal_(layers[-1].weight)
 
-            # 归一化
+            # Normalization
             if norm_layer is not None:
                 layers.append(norm_layer(out_dim))
 
-            # 激活函数和 Dropout
+            # Activation and dropout
             if (i != len(dims) - 2) or final_act:
                 if act is not None:
                     layers.append(act)

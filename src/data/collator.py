@@ -149,7 +149,7 @@ class Collator_pharmagent_chemdiv(object):
         This function assumes padding should be applied at the end.
         """
         padded_tensor = torch.zeros(max_len, dtype=tensor.dtype)
-        padded_tensor[:tensor.size(0)] = tensor  # 填充原始 tensor
+        padded_tensor[:tensor.size(0)] = tensor  # pad the original tensor
         return padded_tensor
 
 

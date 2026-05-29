@@ -217,7 +217,7 @@ class AtomEmbedding(nn.Module):
 
     def forward(self, pair_node_feats, indicators):
         pair_node_h = self.in_proj(pair_node_feats)
-        # 确保virtual_atom_emb的权重与pair_node_h有相同的dtype
+        # Ensure the virtual_atom_emb weights have the same dtype as pair_node_h
         virtual_weight = self.virtual_atom_emb.weight.to(dtype=pair_node_h.dtype)
         pair_node_h[indicators == VIRTUAL_ATOM_FEATURE_PLACEHOLDER, 1, :] = virtual_weight
         return torch.sum(self.input_dropout(pair_node_h), dim=-2)
@@ -236,7 +236,7 @@ class BondEmbedding(nn.Module):
 
     def forward(self, edge_feats, indicators):
         edge_h = self.in_proj(edge_feats)
-        # 确保virutal_bond_emb的权重与edge_h有相同的dtype
+        # Ensure the virutal_bond_emb weights have the same dtype as edge_h
         virtual_weight = self.virutal_bond_emb.weight.to(dtype=edge_h.dtype)
         edge_h[indicators == VIRTUAL_BOND_FEATURE_PLACEHOLDER] = virtual_weight
         return self.input_dropout(edge_h)

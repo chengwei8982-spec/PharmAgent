@@ -397,11 +397,11 @@ def init_model_for_inference(
         n_node_types=vocab.vocab_size,
     ).to(device)
 
-    # 先加载 base 预训练参数（和 finetune 时一致）
+    # Load the base pretrained parameters first, matching finetuning
     base_state = torch.load(pretrained_base_path, map_location="cpu")
     model.load_state_dict({k.replace("module.", ""): v for k, v in base_state.items()})
 
-    # finetune 阶段会删除这些 heads，这里保持一致
+    # These heads are removed during finetuning, so keep the behavior consistent here
     del model.md_predictor
     del model.fp_predictor
     del model.node_predictor
@@ -607,9 +607,9 @@ def ensure_screening_dataset(
     overwrite: bool = False,
 ):
     """
-    创建一个模型可读的数据集目录：
-    datasets_base/cache_dataset_name/cache_dataset_name.csv 仅含 smiles + label(0)
-    同时保存 meta.csv 方便把预测结果 merge 回来
+    Create a model-readable dataset directory:
+    datasets_base/cache_dataset_name/cache_dataset_name.csv containing only smiles + label(0)
+    also save meta.csv so prediction results can be merged back later
     """
     out_dir = os.path.join(dataset_base_path, cache_dataset_name)
     os.makedirs(out_dir, exist_ok=True)
@@ -622,7 +622,7 @@ def ensure_screening_dataset(
 
     df = pd.read_csv(source_csv_path)
     if source_smiles_col not in df.columns:
-        raise ValueError(f"输入文件缺少列 {source_smiles_col}，实际列为: {list(df.columns)[:30]} ...")
+        raise ValueError(f"Input file is missing column {source_smiles_col}; available columns are: {list(df.columns)[:30]} ...")
 
     df = df.dropna(subset=[source_smiles_col]).copy()
     df = filter_valid_smiles(df, source_smiles_col)
@@ -639,7 +639,7 @@ def ensure_screening_dataset(
 
 def maybe_run_preprocess(dataset_base_path: str, cache_dataset_name: str, path_length: int, num_workers: int):
     """
-    如果缺少必要特征文件，则自动运行 preprocess 脚本生成：
+    If required feature files are missing, automatically run preprocessing scripts to generate them:
     - {dataset}_{path_length}.pkl
     - rdkfp1-7_512.npz
     - molecular_descriptors.npz
@@ -667,7 +667,7 @@ def maybe_run_preprocess(dataset_base_path: str, cache_dataset_name: str, path_l
     if not missing:
         return
 
-    # 图/指纹/描述符
+    # Graphs/fingerprints/descriptors
     subprocess.check_call(
         [
             sys.executable,
@@ -684,7 +684,7 @@ def maybe_run_preprocess(dataset_base_path: str, cache_dataset_name: str, path_l
         cwd=BASE_PATH,
     )
 
-    # 药效团特征
+    # Pharmacophore features
     subprocess.check_call(
         [
             sys.executable,
@@ -703,7 +703,7 @@ def maybe_run_preprocess(dataset_base_path: str, cache_dataset_name: str, path_l
         cwd=BASE_PATH,
     )
 
-    # SMILES embedding（chembert）
+    # SMILES embeddings (ChemBERT)
     subprocess.check_call(
         [
             sys.executable,
@@ -727,7 +727,7 @@ def mean_std_from_training_split(train_dataset_base_path: str, train_dataset_nam
     split_path = os.path.join(train_dataset_base_path, train_dataset_name, "splits", f"{split_name}.npy")
     graph_path = os.path.join(train_dataset_base_path, train_dataset_name, f"{train_dataset_name}_{path_length}.pkl")
     if (not os.path.exists(split_path)) or (not os.path.exists(graph_path)):
-        raise FileNotFoundError(f"找不到训练集 split 或 graph：{split_path} 或 {graph_path}")
+        raise FileNotFoundError(f"Could not find the training split or graph file: {split_path} or {graph_path}")
 
     train_idx = np.load(split_path, allow_pickle=True)[0]
     _, label_dict = load_graphs(graph_path)
@@ -784,20 +784,20 @@ def predict(
 
 def parse_args():
     p = argparse.ArgumentParser(description="Use finetuned HPK1_IC50 checkpoint to score DrugBank and export top20")
-    p.add_argument("--checkpoint_dir", type=str, required=True, help="目录内应包含 best_model.pth")
+    p.add_argument("--checkpoint_dir", type=str, required=True, help="the directory should contain best_model.pth")
     p.add_argument("--checkpoint_name", type=str, default="best_model.pth")
 
     p.add_argument("--source_drugbank_csv", type=str, required=True)
     p.add_argument("--source_smiles_col", type=str, default="SMILES")
 
-    # 缓存数据集必须放在 datasets/vs 下，这样 preprocess_dataset_phar.py 会走 vs 分支
+    # The cached dataset must be placed under datasets/vs so preprocess_dataset_phar.py uses the vs branch
     p.add_argument("--dataset_base_path", type=str, default=os.path.join(BASE_PATH, "datasets", "vs"))
     p.add_argument("--cache_dataset_name", type=str, default="DrugBank_cache")
     p.add_argument("--overwrite_cache_csv", action="store_true")
 
     p.add_argument("--pretrained_base_path", type=str, default=os.path.join(BASE_PATH, "pretrained", "base", "base.pth"))
 
-    # 训练集统计量（mean/std）来自 ligand 数据集目录
+    # Training-set statistics (mean/std) come from the ligand dataset directory
     p.add_argument("--train_dataset_base_path", type=str, default=os.path.join(BASE_PATH, "datasets", "ligand"))
     p.add_argument("--train_dataset_name", type=str, default="HPK1_IC50")
     p.add_argument("--train_split_name", type=str, default="scaffold-3")
@@ -806,7 +806,7 @@ def parse_args():
 
     p.add_argument("--device", type=str, default="cuda:0")
     p.add_argument("--batch_size", type=int, default=32)
-    p.add_argument("--num_workers", type=int, default=16, help="预处理 graph 用的 n_jobs")
+    p.add_argument("--num_workers", type=int, default=16, help="number of jobs used for graph preprocessing")
 
     p.add_argument("--text_model_name", type=str, default="pubmed")
     p.add_argument("--smiles_model_name", type=str, default="chembert")
@@ -826,12 +826,12 @@ def main():
 
     ckpt_path = os.path.join(args.checkpoint_dir, args.checkpoint_name)
     if not os.path.exists(ckpt_path):
-        raise FileNotFoundError(f"找不到 checkpoint: {ckpt_path}")
+        raise FileNotFoundError(f"Could not find checkpoint: {ckpt_path}")
 
     if not os.path.exists(args.pretrained_base_path):
-        raise FileNotFoundError(f"找不到 base 预训练权重: {args.pretrained_base_path}")
+        raise FileNotFoundError(f"Could not find base pretrained weights: {args.pretrained_base_path}")
 
-    # 1) 构建 screening 数据集（只含 smiles+label）
+    # 1) Build the screening dataset (containing only smiles + label)
     model_csv_path, meta_csv_path = ensure_screening_dataset(
         source_csv_path=args.source_drugbank_csv,
         source_smiles_col=args.source_smiles_col,
@@ -840,7 +840,7 @@ def main():
         overwrite=args.overwrite_cache_csv,
     )
 
-    # 2) 预处理生成图/特征（缺啥补啥）
+    # 2) Preprocess graphs/features and generate any missing artifacts
     maybe_run_preprocess(
         dataset_base_path=args.dataset_base_path,
         cache_dataset_name=args.cache_dataset_name,
@@ -848,7 +848,7 @@ def main():
         num_workers=args.num_workers,
     )
 
-    # 3) 加载 dataset + collator
+    # 3) Load the dataset and collator
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     collator = Collator_pharmagent(max_length=128)
     ds = PharmaQADataset(
@@ -873,7 +873,7 @@ def main():
     )
     loader = DataLoader(ds, batch_size=args.batch_size, shuffle=False, drop_last=False, collate_fn=collator)
 
-    # 4) 文本问题 embedding
+    # 4) Text question embeddings
     text_dict, text_model = build_text_dict(
         device=device,
         text_model_name=args.text_model_name,
@@ -881,7 +881,7 @@ def main():
         train_text_model=args.train_text_model,
     )
 
-    # 5) 初始化模型并加载 checkpoint
+    # 5) Initialize the model and load the checkpoint
     model = init_model_for_inference(
         device=device,
         pretrained_base_path=args.pretrained_base_path,
@@ -896,7 +896,7 @@ def main():
         text_model=text_model,
     )
 
-    # 6) 反标准化（可选）
+    # 6) Inverse normalization (optional)
     mean = std = None
     if args.use_norm_reg:
         mean, std = mean_std_from_training_split(
@@ -906,17 +906,17 @@ def main():
             path_length=args.path_length,
         )
 
-    # 7) 预测 + topk
+    # 7) Prediction + top-k selection
     pred_df = predict(model, loader, device, text_dict, mean, std)
     pred_df = pred_df.sort_values("prediction", ascending=False).reset_index(drop=True)
     top_df = pred_df.head(args.topk).copy()
 
-    # merge 回 meta（包含 DrugBank ID / Name 等）
+    # Merge back into the metadata table (including DrugBank ID / Name, etc.)
     meta_df = pd.read_csv(meta_csv_path)
     merged = meta_df.merge(top_df, on="SMILES", how="right")
     merged = merged.sort_values("prediction", ascending=False).reset_index(drop=True)
 
-    # 输出
+    # Output
     out_dir = args.output_dir.strip() or args.checkpoint_dir
     os.makedirs(out_dir, exist_ok=True)
     full_out = os.path.join(out_dir, f"{args.cache_dataset_name}_predictions_full.csv")
