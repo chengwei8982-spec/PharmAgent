@@ -199,7 +199,7 @@ python scripts/finetune_pharmagent.py \
   --model_path "$(pwd)/save/<DATASET>/question_num8/scaffold-0/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth"
 ```
 
-### Tiny HPK1 Smoke Test
+### Tiny Smoke Test
 
 This section is the demo workflow for the current public release.
 
@@ -260,7 +260,11 @@ PY
 
 5. Run a tiny evaluation smoke test with the shared base checkpoint.
 
-Before running this step, make sure the pretrained files from the Model Download section are present, or replace `--model_path` with your own trained checkpoint.
+Download the HPK1 example checkpoint here if you want to reproduce this smoke test directly:
+
+- `HPK1.zip`: https://drive.google.com/open?id=1y7FbJcC_iFme_gjXB1izsbD902XO-bAU
+
+After downloading, extract it at the repository root path. You can also replace `--model_path` with your own trained checkpoint.
 
 ```bash
 python scripts/finetune_pharmagent.py \
@@ -272,7 +276,7 @@ python scripts/finetune_pharmagent.py \
   --num_runs 1 \
   --num_workers 0 \
   --batch_size 8 \
-  --model_path "$(pwd)/save/HPK1_IC50/question_num8/scaffold-0/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth" \
+  --model_path "$(pwd)/save/HPK1_IC50/question_num8/scaffold-3/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth" \
   --alpha 0.1 \
   --beta 0.1
 ```
@@ -296,5 +300,5 @@ python scripts/attribution_deepshap_single.py \
   --smiles CCO \
   --device cpu \
   --background_n 2 \
-  --ckpt_path "$(pwd)/save/HPK1_IC50/question_num8/scaffold-0/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth"
+  --ckpt_path "$(pwd)/save/HPK1_IC50/question_num8/scaffold-3/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth"
 ```
