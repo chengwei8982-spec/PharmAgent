@@ -128,6 +128,28 @@ Notes:
 - All remaining columns are treated as supervision targets.
 - For virtual screening data, change `--dataset_kind` to `vs`.
 
+### Data Split
+
+After preprocessing your dataset, generate the split files required by training and evaluation. For scaffold-based ligand and benchmark workflows, use the split generation script below:
+
+```bash
+for seed in 0 1 2; do
+  python scripts/preprocess_scaffold_split.py \
+    --root_path datasets/ligand \
+    --use_split_method random_scaffold_split \
+    --dataset YOUR_DATASET \
+    --seed "$seed"
+done
+```
+
+This creates the `splits/` files consumed by the `scaffold` finetune and evaluate modes.
+
+If you want to reuse the prepared split definitions used for the paper datasets instead of generating them locally, download the split archive here:
+
+- `dataset_split_files.tar.gz`: https://drive.google.com/open?id=1bzNYMBeJSzo1WXKbzOy51wjg441SYjW_
+
+After downloading, extract the archive at the repository root so the `datasets/` tree is restored in the layout expected by the codebase. 
+
 ## Training
 
 Inspect the training arguments first:
@@ -174,7 +196,7 @@ python scripts/finetune_pharmagent.py \
   --num_runs 1 \
   --num_workers 0 \
   --batch_size 4 \
-  --model_path "$(pwd)/save/<DATASET>/question_num8/scaffold-3/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth"
+  --model_path "$(pwd)/save/<DATASET>/question_num8/scaffold-0/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth"
 ```
 
 ### Tiny HPK1 Smoke Test
@@ -214,7 +236,7 @@ python scripts/prepare_raw_dataset.py \
 3. Generate the extra split files required by the `scaffold` finetune and evaluate mode.
 
 ```bash
-for seed in 3 4 5; do
+for seed in 0 1 2; do
   python scripts/preprocess_scaffold_split.py \
     --root_path workspace \
     --use_split_method random_scaffold_split \
@@ -250,7 +272,7 @@ python scripts/finetune_pharmagent.py \
   --num_runs 1 \
   --num_workers 0 \
   --batch_size 8 \
-  --model_path "$(pwd)/save/HPK1_IC50/question_num8/scaffold-3/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth" \
+  --model_path "$(pwd)/save/HPK1_IC50/question_num8/scaffold-0/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth" \
   --alpha 0.1 \
   --beta 0.1
 ```
@@ -274,5 +296,5 @@ python scripts/attribution_deepshap_single.py \
   --smiles CCO \
   --device cpu \
   --background_n 2 \
-  --ckpt_path "$(pwd)/save/HPK1_IC50/question_num8/scaffold-3/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth"
+  --ckpt_path "$(pwd)/save/HPK1_IC50/question_num8/scaffold-0/seed_42/text_model_pubmed/base_encoder_LiGhT/alpha_0.1_beta_0.1/best_model.pth"
 ```
